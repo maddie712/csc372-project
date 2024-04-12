@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 public class Arithmetic {
     private static Pattern expr = Pattern.compile("^(\\S+)\\s*([+\\-*/%])\\s*(\\S+)$");
 	private static Pattern intVal = Pattern.compile("^\\d+$");
-	private static Pattern var = Pattern.compile("^\\w+$");
+	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private static Pattern op = Pattern.compile("^[+\\-*/%]$");
 
     // public Arithmetic(String attempt) {
@@ -40,6 +40,7 @@ public class Arithmetic {
             int leftParen = 0;
             int rightParen = 0;
             for (String token : tokens) {
+                token = token.trim();
                 if (token.substring(0, 1).equals("(")) {
                     leftParen++;
                     token = token.replace("(", "");
@@ -54,13 +55,13 @@ public class Arithmetic {
                 boolean variable = variable(token);
                 boolean operator = operator(token);
                 if (integer) {
-                    System.out.println("<int>: " + token.trim());
+                    System.out.println("<int>: " + token);
                 }
                 else if (variable) {
-                    System.out.println("<var>: " + token.trim());
+                    System.out.println("<var>: " + token);
                 }
                 else if (operator) {
-                    System.out.println("<operator>: " + token.trim());
+                    System.out.println("<operator>: " + token);
                 }
                 else {
                     System.out.println("Failed to parse: { " + token + " } " + "is not a recognized integer, variable, or operator.");
