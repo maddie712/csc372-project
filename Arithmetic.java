@@ -3,7 +3,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Arithmetic {
-    private static Pattern expr = Pattern.compile("^(\\S+)\\s*([+\\-*/%])\\s*(\\S+)$");
+    private static Pattern expr = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
 	private static Pattern intVal = Pattern.compile("^\\d+$");
 	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private static Pattern op = Pattern.compile("^[+\\-*/%]$");
@@ -51,20 +51,20 @@ public class Arithmetic {
                     rightParen++;
                     token = token.replace(")", "");
                 }
-                boolean integer = intValue(token);
+                boolean integer = intValue(token.trim());
                 boolean variable = variable(token);
                 boolean operator = operator(token);
                 if (integer) {
-                    System.out.println("<int>: " + token);
+                    System.out.println("<int>: " + token.trim());
                 }
                 else if (variable) {
-                    System.out.println("<var>: " + token);
+                    System.out.println("<var>: " + token.trim());
                 }
                 else if (operator) {
-                    System.out.println("<operator>: " + token);
+                    System.out.println("<operator>: " + token.trim());
                 }
                 else {
-                    System.out.println("Failed to parse: { " + token + " } " + "is not a recognized integer, variable, or operator.");
+                    System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or operator.");
                     System.exit(0);
                 }
 
