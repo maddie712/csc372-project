@@ -1,3 +1,3 @@
-Collaborators: Madeline DeLeon, Savannah Rabasa, Madison Ryan, Simi Saha
+Collaborators: Madeline DeLeon, Savannah Rabasa, Madison Ryan, and Simi Saha
 
-Language name: ______, Target language: Java
+Language name: Cobra, Target language: Java
