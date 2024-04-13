@@ -3,7 +3,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Comparison {
-    private static Pattern expr = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|<|>))\\s*([\\s\\S]+)$");
+    private static Pattern comp = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|<|>))\\s*([\\s\\S]+)$");
 	private static Pattern intVal = Pattern.compile("^\\d+$");
 	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private static Pattern op = Pattern.compile("^((>=|<=|==|<|>))$");
@@ -34,7 +34,7 @@ public class Comparison {
     }
 
     private static boolean comparisonExpr(String cmd) {
-        Matcher m = expr.matcher(cmd);
+        Matcher m = comp.matcher(cmd);
         boolean match = m.find();
         if (match) {
             String[] tokens;
@@ -64,7 +64,7 @@ public class Comparison {
                     rightParen++;
                     token = token.replace(")", "");
                 }
-                
+
                 if (intValue(token.trim())) {
                     System.out.println("<int>: " + token.trim());
                 }

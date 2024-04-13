@@ -3,7 +3,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Arithmetic {
-    private static Pattern expr = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
+    private static Pattern arith = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
 	private static Pattern intVal = Pattern.compile("^\\d+$");
 	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private static Pattern op = Pattern.compile("^[+\\-*/%]$");
@@ -34,7 +34,7 @@ public class Arithmetic {
     }
 
     private static boolean arithmeticExpr(String cmd) {
-        Matcher m = expr.matcher(cmd);
+        Matcher m = arith.matcher(cmd);
         boolean match = m.find();
         if (match) {
             System.out.println("<arithmetic_expr>: " + cmd);
@@ -58,7 +58,7 @@ public class Arithmetic {
                     rightParen++;
                     token = token.replace(")", "");
                 }
-                
+
                 if (intValue(token.trim())) {
                     System.out.println("<int>: " + token.trim());
                 }
