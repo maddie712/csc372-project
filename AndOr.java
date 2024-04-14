@@ -38,6 +38,7 @@ public class AndOr {
     }
 
     // parens currently not working for statements like not (true or false)
+    // shows bool expr
     private static boolean andOrExpr(String cmd) {
         Matcher m = andOr.matcher(cmd);
         boolean match = m.find();
@@ -51,7 +52,7 @@ public class AndOr {
             	System.out.println(tokens[i]);
             }
             if (tokens.length < 3) {
-                System.out.println("Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or.");
+                System.out.println("Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or or not");
                 System.exit(0);
             }
             int leftParen = 0;
@@ -69,41 +70,40 @@ public class AndOr {
                     rightParen++;
                     token = token.replace(")", "");
                 }
-
-               if (bool(token)) {
-                	 printMsg(match, "<bool>", token.trim(), "boolean");
-                	//System.out.println("<bool>: " + token.trim());
-                }
+               //if (bool(token)) {
+                //	 printMsg(match, "<bool>", token.trim(), "boolean");
+               // }
                 else if (andOrLiteral(token)) {
                 	printMsg(match, "<andOrLiteral>", token.trim(), "and/or literal");
-                	//System.out.println("<andOrLiteral>: " + token.trim());
                 }
                 else if (notExpr(token)) {
                 	String[] tokens2 = token.split("(?<=not)");
                 	printMsg(match, "<notLiteral>", "not", "not literal");
-                	//System.out.println(token.substring(3));
-                	if (bool(token.substring(3).trim())) {
-                		printMsg(match, "<bool>", token.substring(3).trim(), "boolean");
-                	}
-                	else if(variable(token.substring(3).trim())) {
-                		printMsg(match, "<var>", token.substring(3).trim(), "variable");
+                	if (boolExpr(token.substring(3).trim())) {
+                		if (bool(token.substring(3).trim())) {
+                    		printMsg(match, "<bool>", token.substring(3).trim(), "boolean");
+                    	}
+                    	else {
+                    		printMsg(match, "<var>", token.substring(3).trim(), "variable");
+                    	}
+                    	printMsg(match, "<bool_expr>", token.substring(3).trim(), "boolean expression");
                 	}
                 	else {
                 		andOrExpr(token.substring(3));
                 	}
-                	
-                		//else if (bool(token2)) {
-                			//printMsg(match, "<bool>", token2.trim(), "boolean");
-                		//}
-                		//else {
-                			//printMsg(match, "<var>", token2.trim(), "variable");
-                		//}
                 	printMsg(match, "<not_expr>", token.trim(), "not expression");
-                	//System.out.println("<not>: " + token.trim());
                 }
-                else if (variable(token)) {
-                	printMsg(match, "<var>", token.trim(), "variable");
-                    //System.out.println("<var>: " + token.trim());
+                //else if (variable(token)) {
+                //	printMsg(match, "<var>", token.trim(), "variable");
+                //}
+                else if (boolExpr(token)) {
+                	if (bool(token)) {
+                		printMsg(match, "<bool>", token.trim(), "boolean");
+                	}
+                	else {
+                		printMsg(match, "<var>", token.trim(), "variable");
+                	}
+                	printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
                 }
       
                 else {
@@ -118,7 +118,6 @@ public class AndOr {
                 System.exit(0);
             }
         }
-        
         else if (match2) {
         	System.out.println("<not_expr>: " + cmd);
             String[] tokens = cmd.split("(?<=not)");
@@ -144,22 +143,20 @@ public class AndOr {
                     rightParen++;
                     token = token.replace(")", "");
                 }
-                if (bool(token)) {
-                	 printMsg(match2, "<bool>", token.trim(), "boolean");
-                	//System.out.println("<bool>: " + token.trim());
-                }
-                else if (andOrLiteral(token)) {
+               if (andOrLiteral(token)) {
                 	printMsg(match2, "<andOrLiteral>", token.trim(), "and/or literal");
-                	//System.out.println("<andOrLiteral>: " + token.trim());
                 }
                 else if (notLiteral(token)) {
-                	
                 	printMsg(match2, "<notLiteral>", token.trim(), "not literal");
-                	//System.out.println("<not>: " + token.trim());
                 }
-                else if (variable(token)) {
-                	printMsg(match2, "<var>", token.trim(), "variable");
-                    //System.out.println("<var>: " + token.trim());
+                else if (boolExpr(token)) {
+                	if (bool(token)) {
+                		printMsg(match2, "<bool>", token.trim(), "boolean");
+                	}
+                	else {
+                		printMsg(match2, "<var>", token.trim(), "variable");
+                	}
+                	printMsg(match2, "<bool_expr>", token.trim(), "boolean expression");
                 }
                 else {
                     System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.");
@@ -172,7 +169,8 @@ public class AndOr {
                 System.out.println("Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"");
                 System.exit(0);
             }
-        } else {
+        }
+        else {
             System.out.println("Failed to parse: {" + cmd + "} is not a valid and/or expression or subdivision.");
             System.exit(0);
         }
@@ -218,6 +216,14 @@ public class AndOr {
     	boolean match = m.find();
     	//printMsg(match, "<notLiteral>", cmd, "not literal");
     	return match;
+    }
+    
+    private static boolean boolExpr(String cmd) {
+    	Matcher m = bool.matcher(cmd);
+    	boolean match = m.find();
+    	Matcher n = var.matcher(cmd);
+    	boolean match2 = n.find();
+    	return match || match2;
     }
     
     private static void printMsg(boolean match, String ntName, String cmd, String item) {
