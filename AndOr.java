@@ -80,17 +80,24 @@ public class AndOr {
                 }
                 else if (notExpr(token)) {
                 	String[] tokens2 = token.split("(?<=not)");
-                	for (String token2 : tokens2) {
-                		if (bool(token2)) {
-                			printMsg(match, "<bool>", token2.trim(), "boolean");
-                		}
-                		else if (notLiteral(token2)) {
-                			printMsg(match, "<notLiteral>", token2.trim(), "not literal");
-                		}
-                		else {
-                			printMsg(match, "<var>", token2.trim(), "variable");
-                		}
+                	printMsg(match, "<notLiteral>", "not", "not literal");
+                	//System.out.println(token.substring(3));
+                	if (bool(token.substring(3).trim())) {
+                		printMsg(match, "<bool>", token.substring(3).trim(), "boolean");
                 	}
+                	else if(variable(token.substring(3).trim())) {
+                		printMsg(match, "<var>", token.substring(3).trim(), "variable");
+                	}
+                	else {
+                		andOrExpr(token.substring(3));
+                	}
+                	
+                		//else if (bool(token2)) {
+                			//printMsg(match, "<bool>", token2.trim(), "boolean");
+                		//}
+                		//else {
+                			//printMsg(match, "<var>", token2.trim(), "variable");
+                		//}
                 	printMsg(match, "<not_expr>", token.trim(), "not expression");
                 	//System.out.println("<not>: " + token.trim());
                 }
