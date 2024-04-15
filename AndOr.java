@@ -48,9 +48,6 @@ public class AndOr {
         if (match) {
             System.out.println("<and_or>: " + cmd);
             String[] tokens = cmd.split("(?=and|or)|(?<=and|or)");
-            for(int i = 0; i < tokens.length; i++) {
-            	System.out.println(tokens[i]);
-            }
             if (tokens.length < 3) {
                 System.out.println("Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or or not");
                 System.exit(0);

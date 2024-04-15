@@ -49,10 +49,10 @@ public class Print {
                 System.out.println("<var>: " + token.trim());
             }
             else if (string(token)) {
-                System.out.println("<operator>: " + token.trim());
+                System.out.println("<string>: " + token.trim());
             }
-            else if (Arithmetic.parseCmd(token)) {}
-            // else if (Condition.parseCmd(token)) {}  // for when we make condition
+            else if (MultDiv.parseCmd(token)) {}
+            else if (Condition.parseCmd(token)) {}
             else {
                 System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.");
                 System.exit(0);

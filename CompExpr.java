@@ -2,11 +2,11 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Arithmetic {
-    private static Pattern arith = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
+public class CompExpr {
+    private static Pattern comp = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|<|>))\\s*([\\s\\S]+)$");
 	private static Pattern intVal = Pattern.compile("^\\d+$");
 	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private static Pattern op = Pattern.compile("^[+\\-*/%]$");
+    private static Pattern op = Pattern.compile("^((>=|<=|==|<|>))$");
 
 
     // interactive terminal version 
@@ -23,7 +23,7 @@ public class Arithmetic {
     }
 
     public static boolean parseCmd(String cmd) {
-        boolean match = arithmeticExpr(cmd);
+        boolean match = comparisonExpr(cmd);
         if (match) {
         
         }
@@ -33,12 +33,18 @@ public class Arithmetic {
         return match;
     }
 
-    private static boolean arithmeticExpr(String cmd) {
-        Matcher m = arith.matcher(cmd);
+    private static boolean comparisonExpr(String cmd) {
+        Matcher m = comp.matcher(cmd);
         boolean match = m.find();
         if (match) {
-            System.out.println("<arithmetic_expr>: " + cmd);
-            String[] tokens = cmd.split("(?=[+\\-*/])|(?<=[+\\-*/])");
+            String[] tokens;
+            System.out.println("<comparison_expr>: " + cmd);
+            if (cmd.contains(">=") || cmd.contains("<=")) {
+                tokens = cmd.split("(?<=(=))|(?=(<|>))");
+            }
+            else {
+                tokens = cmd.split("(?<=(==|<|>))|(?=(==|<|>))");
+            }
             if (tokens.length < 3) {
                 System.out.println("Failed to parse: { " + cmd.trim() + " } " + "is missing an operand.");
                 System.exit(0);
@@ -68,8 +74,9 @@ public class Arithmetic {
                 else if (operator(token)) {
                     System.out.println("<operator>: " + token.trim());
                 }
+                else if (MultDiv.parseCmd(token)) { }
                 else {
-                    System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.");
+                    System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or comparison operator.");
                     System.exit(0);
                 }
 
@@ -80,7 +87,7 @@ public class Arithmetic {
                 System.exit(0);
             }
         } else {
-            System.out.println("Failed to parse: {" + cmd + "} is not a valid arithmetic expression.");
+            System.out.println("Failed to parse: {" + cmd + "} is not a valid comparison expression.");
             System.exit(0);
         }
         return match;
