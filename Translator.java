@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class Translator {
 	ArrayList<String> intVars = new ArrayList<>();
@@ -23,14 +24,53 @@ public class Translator {
 			reader = new Scanner(inFile);
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine().trim();
-				Line lineParser = new Line();
-				boolean match = lineParser.parseCmd(line);
-				if (match) {
-					outFile.write(lineParser.translated + "\n");
+				if (line.contains("loop")) {
+					String loopBlock = buildBlock(line, reader);
+					ForLoops loop = new ForLoops();
+					if (loop.parseCmd(loopBlock)) {
+						System.out.println(loop.result);
+						outFile.write(loop.translated + "\n");
+					}
+					else {
+						System.out.println(loop.result);
+						System.exit(0);
+					}
+				}
+				else if (line.contains("if")) {
+					String ifElseBlock = buildBlock(line, reader);
+					CondExpr condExpr = new CondExpr();
+					if (condExpr.parseCmd(ifElseBlock)) {
+						System.out.println(condExpr.result);
+						outFile.write(condExpr.translated + "\n");
+					}
+					else {
+						System.out.println(condExpr.result);
+						System.exit(0);
+					}
+				}
+				else if (line.contains("func")) {
+					String funcBlock = buildBlock(line, reader);
+					// TODO
+					FuncDec func = new FuncDec(null, null);
+					if (func.parseCmd(funcBlock)) {
+						System.out.println(func.result);
+						//outFile.write(func.translated + "\n");
+					}
+					else {
+						System.out.println(func.result);
+						System.exit(0);
+					}
 				}
 				else {
+					Line lineParser = new Line();
+					boolean match = lineParser.parseCmd(line);
 					System.out.println(lineParser.result);
-					System.exit(0);
+					if (match) {
+						outFile.write(lineParser.translated + "\n");
+					}
+					else {
+						System.exit(0);
+					}
 				}
 			}
 			outFile.write("}");
@@ -41,16 +81,34 @@ public class Translator {
 	}
 
 	public static FileWriter initializeFile(String oldFilename) {
-		String newFilename = oldFilename.split(".")[0] + ".java";
+		String newFilename = oldFilename.split(".")[0];
 		FileWriter out;
 		try {
-			out = new FileWriter(newFilename);
+			out = new FileWriter(newFilename + ".java");
 			out.write("public class " + newFilename + "{");
 			return out;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static String buildBlock(String firstLine, Scanner in) {
+		String result = firstLine + "\n";
+		Stack<String> stack = new Stack<>();
+		stack.push("{");
+
+		while (!stack.empty()) {
+			String cur = in.nextLine();
+			if (cur.contains("{")) {
+				stack.push("{");
+			}
+			if (cur.contains("}")) {
+				stack.pop();
+			}
+			result += cur + "\n";
+		}
+		return result;
 	}
 
 }
