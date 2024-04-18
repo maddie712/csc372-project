@@ -3,18 +3,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CondExpr {
-    private Pattern ifElsePattern; // Pattern to match if-else conditionals
-    private Pattern ifPattern; // Pattern to match if-only conditionals
-    private Scanner scanner;
+    private Pattern ifElsePattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*else\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
+    private Pattern ifPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
 
-    public CondExpr() {
-        ifElsePattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*else\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
-        ifPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
-        scanner = new Scanner(System.in);
-    }
+    private Condition cond = new Condition();
+    private Line line1 = new Line();
+    private Line line2 = new Line();
+
+    public boolean match;
+    public String result = "";
+    public String translated = "";
 
     public void startInteractiveSession() {
         System.out.print(">> ");
+        Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine().trim();
         while (!input.equals("exit")) {
             translateCondExpr(input);
@@ -33,19 +35,70 @@ public class CondExpr {
             String ifBlock = ifElseMatcher.group(2).trim();
             String elseBlock = ifElseMatcher.group(3).trim();
 
-            System.out.println("if (" + condition + ") {");
-            System.out.println("\t" + ifBlock);
-            System.out.println("} else {");
-            System.out.println("\t" + elseBlock);
-            System.out.println("}");
+            if (cond.parseCmd(condition)) {
+                result += "<if_dec>: if (" + condition + ") {";
+                translated += "if (" + cond.translated + ") {";
+            }
+            else {
+                result = "Failed to parse: {" + input + "} is not a valid conditional expression.\n";
+                translated = "";
+                return false;
+            }
+
+            String[] lines1 = ifBlock.split("\n");
+            for (String l : lines1) {
+                line1.parseCmd(l);
+                if (!line1.match) {
+                    result = line1.result;
+                    return false;
+                }
+            }
+
+            result += "<block>: \n";
+            result += line1.result;
+            translated += line1.translated + "}\n";
+
+            result += "<else>: } else {\n";
+
+            String[] lines2 = elseBlock.split("\n");
+            for (String l : lines2) {
+                line2.parseCmd(l);
+                if (!line2.match) {
+                    result = line2.result;
+                    return false;
+                }
+            }
+
+            result += "<block>: \n";
+            result += line2.result;
+            translated += line2.translated + "}\n";
             return true;
         } else if (ifMatcher.matches()) {
             String condition = ifMatcher.group(1).trim();
             String ifBlock = ifMatcher.group(2).trim();
 
-            System.out.println("if (" + condition + ") {");
-            System.out.println("\t" + ifBlock);
-            System.out.println("}");
+            if (cond.parseCmd(condition)) {
+                result += "<if_dec>: if (" + condition + ") {";
+                translated += "if (" + cond.translated + ") {";
+            }
+            else {
+                result = "Failed to parse: {" + input + "} is not a valid conditional expression.\n";
+                translated = "";
+                return false;
+            }
+
+            String[] lines1 = ifBlock.split("\n");
+            for (String l : lines1) {
+                line1.parseCmd(l);
+                if (!line1.match) {
+                    result = line1.result;
+                    return false;
+                }
+            }
+
+            result += "<block>: \n";
+            result += line1.result;
+            translated += line1.translated + "}\n";
             return true;
         } else {
             System.out.println("Failed to parse: {" + input + "} is not a valid conditional expression.");
