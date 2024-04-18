@@ -1,4 +1,3 @@
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,16 +13,9 @@ public class CondExpr {
     public String result = "";
     public String translated = "";
 
-    public void startInteractiveSession() {
-        System.out.print(">> ");
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine().trim();
-        while (!input.equals("exit")) {
-            translateCondExpr(input);
-            System.out.print(">> ");
-            input = scanner.nextLine().trim();
-        }
-        scanner.close();
+    public boolean parseCmd(String cmd) {
+        match = translateCondExpr(cmd);
+        return match;
     }
 
     public boolean translateCondExpr(String input) {
