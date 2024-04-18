@@ -1,0 +1,16 @@
+display("Hello,")
+displayLine(" world!")
+
+displayLine(5)
+displayLine(3+7)
+displayLine(true and false)
+displayLine(2 > 9)
+
+x = 2
+displayLine(x)
+
+y = "hi"
+displayLine(y)
+
+z = false
+displayLine(z)
