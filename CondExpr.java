@@ -1,12 +1,17 @@
-import java.util.Scanner; 
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CondExpr {
-    private static Pattern condPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*else\\s*\\{(.*)\\}\\s*$");
+    private Pattern condPattern;
+    private Scanner scanner;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    public CondExpr() {
+        condPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*else\\s*\\{(.*)\\}\\s*$");
+        scanner = new Scanner(System.in);
+    }
+
+    public void startInteractiveSession() {
         System.out.print(">> ");
         String input = scanner.nextLine().trim();
         while (!input.equals("exit")) {
@@ -17,7 +22,7 @@ public class CondExpr {
         scanner.close();
     }
 
-    public static boolean translateCondExpr(String input) {
+    public boolean translateCondExpr(String input) {
         Matcher matcher = condPattern.matcher(input);
         if (matcher.matches()) {
             String condition = matcher.group(1).trim();
@@ -37,4 +42,5 @@ public class CondExpr {
             return false;
         }
     }
+
 }
