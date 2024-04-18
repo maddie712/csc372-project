@@ -187,8 +187,12 @@ public class AndOr {
     }
     
     private void printMsg(boolean match, String ntName, String cmd, String item) {
-		if (match)
+		if (match) {
 			result += ntName + ": " + cmd + "\n";
+			cmd = cmd.replace("and", "&&").replace("or", "||");
+			translated += cmd;
+		}
+			
 		else
 			result = "Failed to parse: {" + cmd + "} is not a valid " + item + ".\n";
 	}
