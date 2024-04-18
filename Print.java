@@ -1,82 +1,70 @@
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Print {
-    private static Pattern print = Pattern.compile("^(print\\().*\\)$");
-	private static Pattern intVal = Pattern.compile("^\\d+$");
-	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private static Pattern string = Pattern.compile("^\"\\w*\"$");
+    private Pattern print = Pattern.compile("^(print\\().*\\)$");
+	private Pattern intVal = Pattern.compile("^\\d+$");
+	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+    private Pattern string = Pattern.compile("^\"\\w*\"$");
 
+    private Condition condition = new Condition();
+    private MultDiv multDiv = new MultDiv();
+    public boolean match;
+    public String result = "";
 
-    // interactive terminal version 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        System.out.print(">> ");
-        String cmd = in.nextLine();
-        while (!cmd.equals("exit")) {
-            parseCmd(cmd);
-            System.out.print(">> ");
-            cmd = in.nextLine();
-        }
-        in.close();
-    }
-
-    public static boolean parseCmd(String cmd) {
-        boolean match = print(cmd);
-        if (match) {
-        
-        }
-        else {
-
-        }
+    public boolean parseCmd(String cmd) {
+        match = print(cmd);
         return match;
     }
 
-    private static boolean print(String cmd) {
+    private boolean print(String cmd) {
         Matcher m = print.matcher(cmd);
         boolean match = m.find();
         if (match) {
-            System.out.println("<print>: " + cmd);
+            result += "<print>: " + cmd + "\n";
             String token = cmd.substring(cmd.indexOf("(")+1, cmd.length()-1);
 
             token = token.trim();
             
             if (intValue(token.trim())) {
-                System.out.println("<int>: " + token.trim());
+                result += "<int>: " + token.trim() + "\n";
             }
             else if (variable(token)) {
-                System.out.println("<var>: " + token.trim());
+                result += "<var>: " + token.trim() + "\n";
             }
             else if (string(token)) {
-                System.out.println("<string>: " + token.trim());
+                result += "<string>: " + token.trim() + "\n";
             }
-            else if (MultDiv.parseCmd(token)) {}
-            else if (Condition.parseCmd(token)) {}
+            else if (multDiv.parseCmd(token)) {
+                result += multDiv.result;
+            }
+            else if (condition.parseCmd(token)) {
+                result += condition.result;
+            }
             else {
-                System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.");
-                System.exit(0);
+                result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
+                return false;
             }
         } else {
-            System.out.println("Failed to parse: {" + cmd + "} is not a valid print expression.");
-            System.exit(0);
+            result = "Failed to parse: {" + cmd + "} is not a valid print expression.\n";
+            return false;
         }
         return match;
     }
 
-    private static boolean intValue(String cmd) {
+    private boolean intValue(String cmd) {
         Matcher m = intVal.matcher(cmd);
         boolean match = m.find();
         return match;
     }
 
-    private static boolean variable(String cmd) {
+    private boolean variable(String cmd) {
         Matcher m = var.matcher(cmd);
         boolean match = m.find();
         return match;
     }
 
-    private static boolean string(String cmd) {
+    private boolean string(String cmd) {
         Matcher m = string.matcher(cmd);
         boolean match = m.find();
         return match;

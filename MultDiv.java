@@ -1,47 +1,29 @@
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MultDiv {
-    private static Pattern arith = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
-	private static Pattern intVal = Pattern.compile("^\\d+$");
-	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private static Pattern op = Pattern.compile("^[+\\-*/%]$");
+    private Pattern arith = Pattern.compile("^([\\s\\S]+)\\s*([+\\-*/%])\\s*([\\s\\S]+)$");
+	private Pattern intVal = Pattern.compile("^\\d+$");
+	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+    private Pattern op = Pattern.compile("^[+\\-*/%]$");
 
+    public boolean match;
+    public String result = "";
 
-    // interactive terminal version 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        System.out.print(">> ");
-        String cmd = in.nextLine();
-        while (!cmd.equals("exit")) {
-            parseCmd(cmd);
-            System.out.print(">> ");
-            cmd = in.nextLine();
-        }
-        in.close();
-    }
-
-    public static boolean parseCmd(String cmd) {
-        boolean match = arithmeticExpr(cmd);
-        if (match) {
-        
-        }
-        else {
-
-        }
+    public boolean parseCmd(String cmd) {
+        match = arithmeticExpr(cmd);
         return match;
     }
 
-    private static boolean arithmeticExpr(String cmd) {
+    private boolean arithmeticExpr(String cmd) {
         Matcher m = arith.matcher(cmd);
         boolean match = m.find();
         if (match) {
-            System.out.println("<arithmetic_expr>: " + cmd);
+            result += "<arithmetic_expr>: " + cmd;
             String[] tokens = cmd.split("(?=[+\\-*/])|(?<=[+\\-*/])");
             if (tokens.length < 3) {
-                System.out.println("Failed to parse: { " + cmd.trim() + " } " + "is missing an operand.");
-                System.exit(0);
+                result += "Failed to parse: { " + cmd.trim() + " } " + "is missing an operand.";
+                return false;
             }
             int leftParen = 0;
             int rightParen = 0;
@@ -50,7 +32,7 @@ public class MultDiv {
                 if (token.length() > 0 && token.substring(0, 1).equals("(")) {
                     leftParen++;
                     token = token.replace("(", "");
-                    System.out.println("<paren>: (");
+                    result += "<paren>: (\n";
                 }
                 boolean right = false;
                 if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -60,45 +42,45 @@ public class MultDiv {
                 }
 
                 if (intValue(token.trim())) {
-                    System.out.println("<int>: " + token.trim());
+                    result += "<int>: " + token.trim() + "\n";
                 }
                 else if (variable(token)) {
-                    System.out.println("<var>: " + token.trim());
+                    result += "<var>: " + token.trim() + "\n";
                 }
                 else if (operator(token)) {
-                    System.out.println("<operator>: " + token.trim());
+                    result += "<operator>: " + token.trim() + "\n";
                 }
                 else {
-                    System.out.println("Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.");
-                    System.exit(0);
+                    result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
+                    return false;
                 }
 
-                if (right) { System.out.println("<paren>: )"); }
+                if (right) { result += "<paren>: )\n"; }
             }
             if (leftParen != rightParen) {
-                System.out.println("Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"");
-                System.exit(0);
+                result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
+                return false;
             }
         } else {
-            System.out.println("Failed to parse: {" + cmd + "} is not a valid arithmetic expression.");
-            System.exit(0);
+            result = "Failed to parse: {" + cmd + "} is not a valid arithmetic expression.\n";
+            return false;
         }
         return match;
     }
 
-    private static boolean intValue(String cmd) {
+    private boolean intValue(String cmd) {
         Matcher m = intVal.matcher(cmd);
         boolean match = m.find();
         return match;
     }
 
-    private static boolean variable(String cmd) {
+    private boolean variable(String cmd) {
         Matcher m = var.matcher(cmd);
         boolean match = m.find();
         return match;
     }
 
-    private static boolean operator(String cmd) {
+    private boolean operator(String cmd) {
         Matcher m = op.matcher(cmd);
         boolean match = m.find();
         return match;

@@ -2,43 +2,35 @@ import java.util.Scanner;
 
 public class Condition {
 
-    // interactive terminal version 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        System.out.print(">> ");
-        String cmd = in.nextLine();
-        while (!cmd.equals("exit")) {
-            parseCmd(cmd);
-            System.out.print(">> ");
-            cmd = in.nextLine();
-        }
-        in.close();
-    }
+    private CompExpr comp = new CompExpr();
+    private AndOr andOr = new AndOr();
+    public boolean match;
+    public String result = "";
 
-    public static boolean parseCmd(String cmd) {
-        boolean match = condition(cmd);
-        if (match) {
-        
-        }
-        else {
-
-        }
+    public boolean parseCmd(String cmd) {
+        match = condition(cmd);
         return match;
     }
 
-    private static boolean condition(String cmd) {
-        System.out.println("<condition>: " + cmd);
+    private boolean condition(String cmd) {
+        result += "<condition>: " + cmd + "\n";
 
         boolean match = false;
         String token = cmd.trim();
         
-        boolean comp = CompExpr.parseCmd(token);
-        boolean andOr = AndOr.parseCmd(token);
-        if (comp) { match = true; }
-        else if (andOr) { match = true; }
+        boolean comparison = comp.parseCmd(token);
+        boolean andOrBool = andOr.parseCmd(token);
+        if (comparison) {
+            result += comp.result;
+            match = true;
+        }
+        else if (andOrBool) {
+            result += andOr.result;
+            match = true;
+        }
         else {
-            System.out.println("Failed to parse: {" + cmd + "} is not a valid condition.");
-            System.exit(0);
+            result = "Failed to parse: {" + cmd + "} is not a valid condition.\n";
+            return false;
         }
         return match;
     }
