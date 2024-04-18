@@ -1,0 +1,35 @@
+first = inputInt()
+second = inputInt()
+
+sum = first + second
+product = first * second
+
+max = 0
+nonmax = 0
+if (first > second) {
+	max = first
+	nonmax = second
+}
+else {
+	max = second
+	nonmax = first
+}
+
+difference = max - nonmax
+
+while (max) {
+	temp = max
+	max = nonmax % max
+	nonmax = temp
+}
+gcd = nonmax
+
+lcm = first * second / gcd
+
+print("Output:")
+print("Max = " + max)
+print("Sum = " + sum)
+print("Difference = " + difference)
+print("Product = " + product)
+print("GCD = " + gcd)
+print("LCM = " + lcm)
