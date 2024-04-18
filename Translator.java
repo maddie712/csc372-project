@@ -81,7 +81,10 @@ public class Translator {
 	}
 
 	public static FileWriter initializeFile(String oldFilename) {
-		String newFilename = oldFilename.split(".")[0];
+		String newFilename = oldFilename.split("\\.")[0];
+		//String[] newFilename = oldFilename.split("\\.");
+		//System.out.print(oldFilename);
+		//System.out.print(newFilename.length);
 		FileWriter out;
 		try {
 			out = new FileWriter(newFilename + ".java");
