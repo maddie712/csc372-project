@@ -4,40 +4,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VarAssign {
-    private static String varName= null;
-    private static String type= null;
-    private static String val= null;
-    private static HashMap<String,String> varToType= null;
+	public boolean match;
+	public String result;
 
-    private static Pattern var_assign = Pattern.compile("^(.+)=(.+)$");
-	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-	private static Pattern string = Pattern.compile("\".*\"$");
+    private String varName= null;
+    private String type= null;
+    private String val= null;
+	private HashMap<String,String> varTypes= null;
+	private HashMap<String,FuncInfo> funcs= null;
 
-    public static void main(String[] args) {
-		HashMap<String,String> varTypes = new HashMap<>();
-		String[] cmds = {"x = 10+2","y=true","z=\"hello world\"", "mult_div= 20/x", "cond=(1<mult_div)"};
-		//Scanner scan = new Scanner(System.in);
+    private Pattern var_assign = Pattern.compile("^(.+)=(.+)$");
+	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+	private Pattern string = Pattern.compile("\".*\"$");
 
-		for(String cmd: cmds) {
-			if(!parseLine(varTypes,cmd)){
-				System.out.println("invalid <var_assign>: " + cmd);
-			}
-		}
+	public VarAssign(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+		this.varTypes = varTypes;
+		this.funcs = funcs;
 	}
 
 	/* 
 	 * Parses a variable assignment line according to the grammar for 
 	 * <var_assign>. 
 	 */
-    public static boolean parseLine(HashMap<String,String> varTypes, String cmd) {
-		varToType = varTypes;
+    public boolean parseCmd(String cmd) {
+		// resets current line info
+		varName = "";
+		type = "";
+		val = "";
+
         Matcher m = var_assign.matcher(cmd);
 		boolean match = false;
 		if (m.find()) {
 			match = true;
             match = match && parseVal(m.group(2).strip());
             match = match && parseVar(m.group(1).strip());
-			printTranslation();
+			
+			result = javaTranslate();
         }
 
         return match;
@@ -48,21 +50,24 @@ public class VarAssign {
 	 * name already exists, performs type-checking to ensure the new value 
 	 * is the same type.
 	 */
-    private static boolean parseVar(String cmd) {
+    private boolean parseVar(String cmd) {
 		Matcher m = var.matcher(cmd);
+		boolean match = false;
 		if(m.find()) {
-        	if(varToType.containsKey(cmd) && varToType.get(cmd).equals(type)) {
+			match = true;
+        	if(varTypes.containsKey(cmd) && varTypes.get(cmd).equals(type)) {
 				varName = cmd;
-				return true;
         	}
+			else if(varTypes.containsKey(cmd)) {
+				match = false;
+			}
 			else {
 				varName = cmd;
-				varToType.put(varName,type);
-				return true;
+				varTypes.put(varName,type);
 			}
     	}
 
-        return false;
+        return match;
     }
 
 	/* 
@@ -72,43 +77,53 @@ public class VarAssign {
 	 * Currently doesn't work for non-<mult_div> assignments because of how
 	 * MultDiv.java is written and the same would be true for Condition.java.
 	 */
-    private static boolean parseVal(String cmd) {
-        if (MultDiv.parseCmd(cmd)) { 
+    private boolean parseVal(String cmd) {
+		boolean match = false;
+        if (Func.parseFuncCall(cmd)){
+			type = funcs.get(cmd).type;  // this needs to be error checked
+			val = cmd;
+			match = true;
+		}
+		
+		else if (MultDiv.parseCmd(cmd)) { 
 			type = "int";
 			val = cmd;
-			return true;
+			match = true;
 		}
 		else if (Condition.parseCmd(cmd)) {
 			type = "boolean";
 			val = cmd;
-			return true;
+			match = true;
 		}
 		else {
 			Matcher m = string.matcher(cmd);
 			if(m.find()) {
 				type = "String";
 				val = cmd;
-				return true;
+				match = true;
 			}
 			else {
 				// Checks if the value is a variable
 				m = var.matcher(cmd);
 				if(m.find()) {
-					type = varToType.get(cmd);
+					type = varTypes.get(cmd);
 					if (type!=null) { // if value var already declared
 						val = cmd;
-						return true;
+						match = true;
 					}
 				}
 			}
 		}
         // still need to check Input
 
-		System.err.println("Could not parse value of <var_assign>: " + cmd);
-        return false;
+        return match;
     }
 
-	private static void printTranslation() {
+	private String javaTranslate() {
+		return type + " " + varName + " = " + val + ";\n";
+	}
+
+	private void printTranslation() {
 		System.out.print(type + " ");
 		System.out.print(varName + " = ");
 		System.out.print(val);
