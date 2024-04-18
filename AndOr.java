@@ -162,7 +162,7 @@ public class AndOr {
             }
         }
         else if (cmd.contains("and") || cmd.contains("or")) {
-            andOrExpr(cmd);
+            match = andOrExpr(cmd);
         }
         return match;
 	}
