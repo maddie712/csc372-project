@@ -9,6 +9,7 @@ public class MultDiv {
 
     public boolean match;
     public String result = "";
+    public String translated = "";
 
     public boolean parseCmd(String cmd) {
         match = arithmeticExpr(cmd);
@@ -23,6 +24,7 @@ public class MultDiv {
             String[] tokens = cmd.split("(?=[+\\-*/])|(?<=[+\\-*/])");
             if (tokens.length < 3) {
                 result += "Failed to parse: { " + cmd.trim() + " } " + "is missing an operand.";
+                translated = "";
                 return false;
             }
             int leftParen = 0;
@@ -33,6 +35,7 @@ public class MultDiv {
                     leftParen++;
                     token = token.replace("(", "");
                     result += "<paren>: (\n";
+                    translated += "(";
                 }
                 boolean right = false;
                 if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -43,26 +46,35 @@ public class MultDiv {
 
                 if (intValue(token.trim())) {
                     result += "<int>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else if (variable(token)) {
                     result += "<var>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else if (operator(token)) {
                     result += "<operator>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else {
                     result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
+                    translated = "";
                     return false;
                 }
 
-                if (right) { result += "<paren>: )\n"; }
+                if (right) { 
+                    result += "<paren>: )\n";
+                    translated += ")";
+                }
             }
             if (leftParen != rightParen) {
                 result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
+                translated = "";
                 return false;
             }
         } else {
             result = "Failed to parse: {" + cmd + "} is not a valid arithmetic expression.\n";
+            translated = "";
             return false;
         }
         return match;

@@ -4,6 +4,7 @@ public class Condition {
     private AndOr andOr = new AndOr();
     public boolean match;
     public String result = "";
+    public String translated = "";
 
     public boolean parseCmd(String cmd) {
         match = condition(cmd);
@@ -20,10 +21,12 @@ public class Condition {
         boolean andOrBool = andOr.parseCmd(token);
         if (comparison) {
             result += comp.result;
+            translated += comp.translated;
             match = true;
         }
         else if (andOrBool) {
             result += andOr.string;
+            translated += andOr.translated;
             match = true;
         }
         else {

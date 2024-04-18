@@ -11,6 +11,7 @@ public class CompExpr {
 
     public boolean match;
     public String result = "";
+    public String translated = "";
 
     public boolean parseCmd(String cmd) {
         match = comparisonExpr(cmd);
@@ -41,6 +42,7 @@ public class CompExpr {
                     leftParen++;
                     token = token.replace("(", "");
                     result += "<paren>: (\n";
+                    translated += "(";
                 }
                 boolean right = false;
                 if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -51,29 +53,39 @@ public class CompExpr {
 
                 if (intValue(token.trim())) {
                     result += "<int>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else if (variable(token)) {
                     result += "<var>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else if (operator(token)) {
                     result += "<operator>: " + token.trim() + "\n";
+                    translated += token;
                 }
                 else if (multDiv.parseCmd(token)) { 
                     result += multDiv.result;
+                    translated += multDiv.translated;
                 }
                 else {
                     result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or comparison operator.\n";
+                    translated = "";
                     return false;
                 }
 
-                if (right) { result += "<paren>: )\n"; }
+                if (right) { 
+                    result += "<paren>: )\n";
+                    translated += ")";
+                }
             }
             if (leftParen != rightParen) {
                 result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
+                translated = "";
                 return false;
             }
         } else {
             result = "Failed to parse: {" + cmd + "} is not a valid comparison expression.\n";
+            translated = "";
             return false;
         }
         return match;

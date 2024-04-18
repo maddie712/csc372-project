@@ -29,23 +29,23 @@ public class Print {
             
             if (intValue(token.trim())) {
                 result += "<int>: " + token.trim() + "\n";
-                translated += token.trim() + ");";
+                translated += token + ");";
             }
             else if (variable(token)) {
                 result += "<var>: " + token.trim() + "\n";
-                translated += token.trim() + ");";
+                translated += token + ");";
             }
             else if (string(token)) {
                 result += "<string>: " + token.trim() + "\n";
-                translated += token.trim() + ");";
+                translated += token + ");";
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
-                translated += token.trim() + ");";
+                translated += token + ");";
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
-                translated += token.trim() + ");";
+                translated += token + ");";
             }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
