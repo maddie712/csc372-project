@@ -5,33 +5,37 @@ import java.util.regex.Pattern;
 
 public class AndOr {
 	public boolean match;
-	public String string = "";
+	public String result = "";
+	public String translated = "";
 	
+	//private AndOr andOrObject = new AndOr();
+	private Condition cond = new Condition();
 	
-	private static Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+	Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     
-    private static Pattern andOr = Pattern.compile("^([\\s\\S]+)\\s*(and|or)\\s*([\\s\\S]+)$");
-    private static Pattern not = Pattern.compile("(not)\\s*([\\S]+)$");
-    private static Pattern notLiteral = Pattern.compile("^not$");
-    private static Pattern bool = Pattern.compile("^true$|^false$");
-    private static Pattern andOrLiteral = Pattern.compile("^and$|^or$");
+    Pattern andOr = Pattern.compile("^([\\s\\S]+)\\s*(and|or)\\s*([\\s\\S]+)$");
+    Pattern not = Pattern.compile("(not)\\s*([\\S]+)$");
+    Pattern notLiteral = Pattern.compile("^not$");
+    Pattern bool = Pattern.compile("^true$|^false$");
+    Pattern andOrLiteral = Pattern.compile("^and$|^or$");
 
 
     // interactive terminal version 
-    //public static void main(String[] args) {
-    //    Scanner in = new Scanner(System.in);
-    //    System.out.print(">> ");
-    //    String cmd = in.nextLine();
-    //    while (!cmd.equals("exit")) {
-    //        parseCmd(cmd);
-    //        System.out.print(">> ");
-    //        cmd = in.nextLine();
-    //    }
-    //    in.close();
-    ///}
+    public void run(String[] args) {
+		Scanner in = new Scanner(System.in);
+		System.out.print(">> ");
+		String cmd = in.nextLine();
+		while (!cmd.equals("exit")) {
+			parseCmd(cmd);
+			System.out.print(">> ");
+			cmd = in.nextLine();
+		}
+		in.close();
+    }
 
     public boolean parseCmd(String cmd) {
     	match = andOrExpr(cmd);
+    	System.out.print(result);
         return match;
     }
 
@@ -44,12 +48,11 @@ public class AndOr {
         boolean match2 = n.find();
         
         if (match) {
-            string += "<and_or>: " + cmd + "\n";
+            result += "<and_or>: " + cmd + "\n";
             String[] tokens = cmd.split("(?=and|or)|(?<=and|or)");
             if (tokens.length < 3) {
-                string = "Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or or not\n";
+                result = "Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or or not\n";
                 return false;
-                //System.exit(0);
             }
             int leftParen = 0;
             int rightParen = 0;
@@ -58,7 +61,15 @@ public class AndOr {
                 if (token.length() > 0 && token.substring(0, 1).equals("(")) {
                     leftParen++;
                     token = token.replace("(", "");
-                    string += "<paren>: (\n";
+                    result += "<paren>: (\n";
+                    translated += "(";
+                    if (cond.parseCmd(token)) {
+                    	result += cond.result;
+                    	translated += cond.translated;
+                    	printMsg(true, "<bool_expr>", token.trim(), "boolean expression");
+                    	printMsg(true, "<not_expr>", token.trim(), "not expression");
+                    	return true;
+                    }
                 }
                 boolean right = false;
                 if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -79,9 +90,12 @@ public class AndOr {
                 		if (bool(token.substring(3).trim())) {
                     		printMsg(match, "<bool>", token.substring(3).trim(), "boolean");
                     	}
-                    	else {
+                    	else if(variable(token.substring(3).trim())){
                     		printMsg(match, "<var>", token.substring(3).trim(), "variable");
                     	}
+                    	//else {
+                    		//printMsg(match, "<condition>", token.substring(3).trim(), "condition");
+                    	//}
                     	printMsg(match, "<bool_expr>", token.substring(3).trim(), "boolean expression");
                 	}
                 	else {
@@ -103,27 +117,27 @@ public class AndOr {
                 }
       
                 else {
-                    string = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
+                    result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
                     //System.exit(0);
                     return false;
                 }
 
-                if (right) { string += "<paren>: )\n"; }
+                if (right) { result += "<paren>: )\n"; }
             }
             if (leftParen != rightParen) {
-                string = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
+                result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
                 //System.exit(0);
                 return false;
             }
         }
         else if (match2) {
-        	string += "<not_expr>: " + cmd + "\n";
+        	result += "<not_expr>: " + cmd + "\n";
             String[] tokens = cmd.split("(?<=not)");
             //for(int i = 0; i < tokens.length; i++) {
             	//System.out.println(tokens[i]);
            //}
             if (tokens.length < 2) {
-                string = "Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or.\n";
+                result = "Failed to parse: { " + cmd.trim() + " } " + "is missing an and or or.\n";
                 //System.exit(0);
                 return false;
             }
@@ -134,7 +148,7 @@ public class AndOr {
                 if (token.length() > 0 && token.substring(0, 1).equals("(")) {
                     leftParen++;
                     token = token.replace("(", "");
-                    string += "<paren>: (\n";
+                    result += "<paren>: (\n";
                 }
                 boolean right = false;
                 if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -158,21 +172,21 @@ public class AndOr {
                 	printMsg(match2, "<bool_expr>", token.trim(), "boolean expression");
                 }
                 else {
-                    string = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
+                    result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
                     //System.exit(0);
                     return false;
                 }
 
-                if (right) {string += "<paren>: )\n"; }
+                if (right) {result += "<paren>: )\n"; }
             }
             if (leftParen != rightParen) {
-                string = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
+                result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
                 //System.exit(0);
                 return false;
             }
         }
         else {
-            string = "Failed to parse: {" + cmd + "} is not a valid and/or expression or subdivision.\n";
+            result = "Failed to parse: {" + cmd + "} is not a valid and/or expression or subdivision.\n";
             //System.exit(0);
             return false;
         }
@@ -225,13 +239,23 @@ public class AndOr {
     	boolean match = m.find();
     	Matcher n = var.matcher(cmd);
     	boolean match2 = n.find();
-    	return match || match2;
+    	//Condition cond = new Condition();
+    	//boolean condBool = cond.parseCmd(cmd); 
+    	return match || match2;// condBool;
     }
     
     private void printMsg(boolean match, String ntName, String cmd, String item) {
 		if (match)
-			string += ntName + ": " + cmd + "\n";
+			result += ntName + ": " + cmd + "\n";
 		else
-			string = "Failed to parse: {" + cmd + "} is not a valid " + item + ".\n";
+			result = "Failed to parse: {" + cmd + "} is not a valid " + item + ".\n";
 	}
+    
+    public String translate(String string) {
+    	String result = "";
+    	
+    	
+    	
+    	return result;
+    }
 }

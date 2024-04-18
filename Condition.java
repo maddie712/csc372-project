@@ -25,7 +25,7 @@ public class Condition {
             match = true;
         }
         else if (andOrBool) {
-            result += andOr.string;
+            result += andOr.result;
             translated += andOr.translated;
             match = true;
         }
