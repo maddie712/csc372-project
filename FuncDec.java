@@ -143,15 +143,18 @@ public class FuncDec {
     private String getType(String cmd) {
         String type = null;
         FuncCall fnCall = new FuncCall(varTypes,funcs);
+		MultDiv md = new MultDiv();
+		Condition cond = new Condition();
+
         if (fnCall.parseCmd(cmd)){
             retVal = cmd;
 			type = funcs.get(cmd).type;
 		}
-        else if(MultDiv.parseCmd(cmd)){
+        else if(md.parseCmd(cmd)){
             retVal = cmd;
 			type = "int";
         }
-        else if(Condition.parseCmd(cmd)){
+        else if(cond.parseCmd(cmd)){
             retVal = cmd;
 			type = "boolean";
         }

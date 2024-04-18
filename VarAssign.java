@@ -101,17 +101,20 @@ public class VarAssign {
     private boolean parseVal(String cmd) {
 		boolean match = false;
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
+		MultDiv md = new MultDiv();
+		Condition cond = new Condition();
+
         if (fnCall.parseCmd(cmd)){
 			type = funcs.get(cmd).type;
 			val = cmd;
 			match = true;
 		}
-		else if (MultDiv.parseCmd(cmd)) { 
+		else if (md.parseCmd(cmd)) { 
 			type = "int";
 			val = cmd;
 			match = true;
 		}
-		else if (Condition.parseCmd(cmd)) {
+		else if (cond.parseCmd(cmd)) {
 			type = "boolean";
 			val = cmd;
 			match = true;

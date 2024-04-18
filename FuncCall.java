@@ -113,10 +113,13 @@ public class FuncCall {
      * Gets the type of an argument.
      */
     private String getType(String arg) {
-        if(MultDiv.parseCmd(arg)){
+		MultDiv md = new MultDiv();
+		Condition cond = new Condition();
+
+        if(md.parseCmd(arg)){
             return "int";
         }
-        else if(Condition.parseCmd(arg)){
+        else if(cond.parseCmd(arg)){
             return "boolean";
         }
         else {
