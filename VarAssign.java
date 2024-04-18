@@ -17,6 +17,8 @@ public class VarAssign {
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern string = Pattern.compile("\".*\"$");
 
+
+	// Constructor
 	public VarAssign(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
 		this.varTypes = varTypes;
 		this.funcs = funcs;
@@ -79,7 +81,8 @@ public class VarAssign {
 	 */
     private boolean parseVal(String cmd) {
 		boolean match = false;
-        if (Func.parseFuncCall(cmd)){
+		FuncCall fnCall = new FuncCall();
+        if (fnCall.parseCmd(cmd)){
 			type = funcs.get(cmd).type;  // this needs to be error checked
 			val = cmd;
 			match = true;
