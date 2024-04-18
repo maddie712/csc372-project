@@ -14,6 +14,7 @@ public class VarAssign {
 
     private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern string = Pattern.compile("\"\\S*\"$");
 
 
@@ -70,18 +71,19 @@ public class VarAssign {
 		match = false;
 		if(m.find()) {
 			match = true;
-        	if(varTypes.containsKey(cmd) && varTypes.get(cmd).equals(type)) {
-				varName = cmd;
-				result += "<var>: " + varName;
-        	}
-			else if(varTypes.containsKey(cmd)) {
-				result = "Failed to parse: " + cmd + ". Mismatch type assign.\n";
-				match = false;
-			}
-			else {
+			if(!varTypes.containsKey(cmd)) {
 				varName = cmd;
 				varTypes.put(varName,type);
 				result += "<var>: " + varName;
+			}
+			else if (varTypes.get(cmd).equals(type)) {
+				varName = cmd;
+				result += "<var>: " + varName;
+        	}
+			// if var already exists but with different type assignment
+			else {
+				result += "Failed to parse: " + cmd + ". Mismatch type assign.\n";
+				match = false;
 			}
     	}
 		else {
@@ -103,13 +105,14 @@ public class VarAssign {
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
+		Matcher m = intVal.matcher(cmd);
 
         if (fnCall.parseCmd(cmd)){
 			type = funcs.get(cmd).type;
 			val = cmd;
 			match = true;
 		}
-		else if (md.parseCmd(cmd)) { 
+		else if (md.parseCmd(cmd) || m.find()) { 
 			type = "int";
 			val = cmd;
 			match = true;
@@ -120,7 +123,7 @@ public class VarAssign {
 			match = true;
 		}
 		else {
-			Matcher m = string.matcher(cmd);
+			m = string.matcher(cmd);
 			if(m.find()) {
 				type = "String";
 				val = cmd;
