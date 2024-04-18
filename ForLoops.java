@@ -1,13 +1,19 @@
-import java.util.Scanner; 
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ForLoops {
-    private static Pattern forLoopPattern = Pattern.compile("^\\s*for\\s*\\((.+);\\s*(.+);\\s*(.+)\\+\\+\\)\\s*\\{(.*)\\}\\s*$");
-    private static Pattern whileLoopPattern = Pattern.compile("^\\s*while\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$");
+    private Pattern forLoopPattern;
+    private Pattern whileLoopPattern;
+    private Scanner scanner;
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    public ForLoops() {
+        forLoopPattern = Pattern.compile("^\\s*for\\s*\\((.+);\\s*(.+);\\s*(.+)\\+\\+\\)\\s*\\{(.*)\\}\\s*$");
+        whileLoopPattern = Pattern.compile("^\\s*while\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$");
+        scanner = new Scanner(System.in);
+    }
+
+    public void startInteractiveSession() {
         System.out.print(">> ");
         String input = scanner.nextLine().trim();
         while (!input.equals("exit")) {
@@ -18,7 +24,7 @@ public class ForLoops {
         scanner.close();
     }
 
-    public static boolean translateLoop(String input) {
+    public boolean translateLoop(String input) {
         Matcher forLoopMatcher = forLoopPattern.matcher(input);
         Matcher whileLoopMatcher = whileLoopPattern.matcher(input);
 
@@ -47,4 +53,5 @@ public class ForLoops {
             return false;
         }
     }
+
 }
