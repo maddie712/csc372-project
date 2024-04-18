@@ -11,6 +11,7 @@ public class Print {
     private MultDiv multDiv = new MultDiv();
     public boolean match;
     public String result = "";
+    public String translated = "System.out.println(";
 
     public boolean parseCmd(String cmd) {
         match = print(cmd);
@@ -28,25 +29,32 @@ public class Print {
             
             if (intValue(token.trim())) {
                 result += "<int>: " + token.trim() + "\n";
+                translated += token.trim() + ");";
             }
             else if (variable(token)) {
                 result += "<var>: " + token.trim() + "\n";
+                translated += token.trim() + ");";
             }
             else if (string(token)) {
                 result += "<string>: " + token.trim() + "\n";
+                translated += token.trim() + ");";
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
+                translated += token.trim() + ");";
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
+                translated += token.trim() + ");";
             }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
+                translated = "";
                 return false;
             }
         } else {
             result = "Failed to parse: {" + cmd + "} is not a valid print expression.\n";
+            translated = "";
             return false;
         }
         return match;

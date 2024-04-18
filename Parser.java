@@ -2,9 +2,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Parser {
+	ArrayList<String> intVars = new ArrayList<>();
+	ArrayList<String> stringVars = new ArrayList<>();
+	ArrayList<String> boolVars = new ArrayList<>();
 
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
