@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 public class Condition {
 
     private CompExpr comp = new CompExpr();
@@ -25,7 +23,7 @@ public class Condition {
             match = true;
         }
         else if (andOrBool) {
-            result += andOr.result;
+            result += andOr.string;
             match = true;
         }
         else {
