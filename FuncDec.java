@@ -10,12 +10,15 @@ public class FuncDec {
     public boolean match;
     public String result;
 
+    private FuncInfo fn= null;
+    private String retVal= null;
     private HashMap<String,String> varTypes= null;
     private HashMap<String,FuncInfo> funcs= null;
 
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
-    private Pattern func_dec = Pattern.compile("^func (.+)\\s*\\((.*)\\)\\s*{$");
+    private Pattern func_dec = Pattern.compile("^func (.+)\\s*\\((.*)\\)\\s*\\{$");
 	private Pattern return_ln = Pattern.compile("^return( .+)*$");
+    private Pattern string = Pattern.compile("\".*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 
 
@@ -31,27 +34,22 @@ public class FuncDec {
     /*
      * Parses the header line of a function declaration in our language.
      */
-    public FuncInfo parseFuncDec(String cmd) {
+    public boolean parseCmd(String cmd) {
+        match = false;
+        result = "";
+        fn = null;
         Matcher m = func_dec.matcher(cmd);
-        boolean match = false;
-        FuncInfo fn = null;
         if(m.find()) {
+            result += "<func_dec>: " + cmd + "\n";
             fn = new FuncInfo();
             fn.name = m.group(1).strip();
             match = true;
-            match = match && parseName(fn.name, true);
+            match = match && parseName(fn.name);
             match = match && parseParams(fn, m.group(2).strip());
         }
-
-        if(!match) { // for invalid func name or parameters
-            return null;
-        }
         
-        
-        return fn;
+        return match;
     }
-
-
 
     /*
      * Parses a return line in our language.
@@ -60,12 +58,34 @@ public class FuncDec {
         Matcher m = return_ln.matcher(cmd);
         boolean match = false;
         if(m.find()) {
-            match = parseReturn(m.group(1));
+            String retType = getType(m.group(1).strip());
+            match = (retType!=null);
+            if(fn.type!=null) {
+                match = match && fn.type.equals(retType);
+            }
+            else {
+                fn.type = retType;
+                result += "<type>: " + retType + "\n";
+            }
         }
         return match;
     }
 
-    
+    /*
+     * Translates the header of a function into java syntax.
+     * Assumes parseCmd() was successful and function has been fully parsed.
+     */
+    public String translateHeader() {
+        return fn.type + " " + fn.name + "(" + fn.javaParams() + ") {\n";
+    }
+
+    /*
+     * Translates a return line into java syntax.
+     * Assumes parseReturn was successful.
+     */
+    public String translateReturn() {
+        return "return " + retVal + ";\n";
+    }
 
 
     // Private Methods
@@ -73,13 +93,19 @@ public class FuncDec {
     /*
      * Parses a function name by checking if it is a valid name.
      */
-    private boolean parseName(String nm, boolean isDec) {
-        Matcher m = func_name.matcher(nm);
+    private boolean parseName(String cmd) {
+        Matcher m = func_name.matcher(cmd);
         if(m.find()) {
-            if(isDec && !funcs.containsKey(nm))  // no double-declaring methods
+            if(!funcs.containsKey(cmd)) { 
+                result += "<func>: " + cmd + "\n";
                 return true;
-            else if (!isDec && funcs.containsKey(nm))  // method must exist to call
-                return true;
+            }
+            else {
+                result += "Failed to parse: '" + cmd + "'. Function already exists.\n";
+            }
+        }
+        else {
+            result += "Failed to parse: '" + cmd + "'. Invalid function name.\n";
         }
         return false;
     }
@@ -90,36 +116,62 @@ public class FuncDec {
     private boolean parseParams(FuncInfo fn, String paramsStr) {
         fn.paramTypes = new HashMap<>();
         if(paramsStr.equals("")) {
+            result += "<params>:\n";
             return true;
         }
 
         String[] params = paramsStr.split(",");
         for(String param: params) {
-            Matcher m = var.matcher(paramsStr);
+            Matcher m = var.matcher(param.strip());
             if(m.find()) {
-                fn.paramTypes.put(param, "undef"); 
+                fn.paramTypes.put(param.strip(), "undef"); 
             }
             else {
-                System.err.println("Parameter '" + param + "' is not a variable.");
+                result += "Failed to parse: '" + param + "'. Invalid variable name.\n";
                 return false;
             }
         }
 
+        String paramsFmt = String.join(", ",fn.paramTypes.keySet());
+        result += "<params>: (" + paramsFmt + ")\n";
         return true;
     }
 
-
-
     /*
-     * Prints a function declaration header according to java format
+     * Gets the type of a (return) value.
      */
-    private void printDec(FuncInfo fn) {
-        System.out.print(fn.type + " ");
-        System.out.print(fn.name + " (");
-        for (String param: fn.paramTypes.keySet()) {
-            System.out.print(fn.paramTypes.get(param) + " " + param + ", ");
+    private String getType(String cmd) {
+        String type = null;
+        FuncCall fnCall = new FuncCall(varTypes,funcs);
+        if (fnCall.parseCmd(cmd)){
+            retVal = cmd;
+			type = funcs.get(cmd).type;
+		}
+        else if(MultDiv.parseCmd(cmd)){
+            retVal = cmd;
+			type = "int";
         }
-        System.out.println(") {");
-    }
+        else if(Condition.parseCmd(cmd)){
+            retVal = cmd;
+			type = "boolean";
+        }
+        else {
+            Matcher m = string.matcher(cmd);
+            if(m.find()) {
+                retVal = cmd;
+			    type = "String";
+            }
+            else {
+                m = var.matcher(cmd);
+                if(m.find()) {
+                    if(varTypes.containsKey(cmd)) {
+                        retVal = cmd;
+			            type = varTypes.get(cmd);
+                    }
+                }
+            }
+        }
 
+        return type;
+    }
 }

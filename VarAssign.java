@@ -100,7 +100,7 @@ public class VarAssign {
 	 */
     private boolean parseVal(String cmd) {
 		boolean match = false;
-		FuncCall fnCall = new FuncCall();
+		FuncCall fnCall = new FuncCall(varTypes,funcs);
         if (fnCall.parseCmd(cmd)){
 			type = funcs.get(cmd).type;
 			val = cmd;
