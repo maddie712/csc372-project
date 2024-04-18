@@ -3,48 +3,39 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ForLoops {
-    private Pattern forLoopPattern;
-    private Pattern whileLoopPattern;
     private Scanner scanner;
+    private Pattern loopPattern;
 
     public ForLoops() {
-        forLoopPattern = Pattern.compile("^\\s*for\\s*\\((.+);\\s*(.+);\\s*(.+)\\+\\+\\)\\s*\\{(.*)\\}\\s*$");
-        whileLoopPattern = Pattern.compile("^\\s*while\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$");
+        String loopRegex = "\\s*loop\\(([^,{}]+)(?:,([^{}]+))?\\)\\s*\\{(.+)\\}\\s*";
+        loopPattern = Pattern.compile(loopRegex, Pattern.DOTALL);
         scanner = new Scanner(System.in);
     }
 
     public void startInteractiveSession() {
-        System.out.print(">> ");
+        System.out.println("Enter loop expression or type 'exit' to quit:");
         String input = scanner.nextLine().trim();
-        while (!input.equals("exit")) {
+        while (!input.equalsIgnoreCase("exit")) {
             translateLoop(input);
-            System.out.print(">> ");
             input = scanner.nextLine().trim();
         }
         scanner.close();
     }
 
     public boolean translateLoop(String input) {
-        Matcher forLoopMatcher = forLoopPattern.matcher(input);
-        Matcher whileLoopMatcher = whileLoopPattern.matcher(input);
+        Matcher matcher = loopPattern.matcher(input);
+        if (matcher.matches()) {
+            String firstExpression = matcher.group(1).trim();
+            String secondExpression = matcher.group(2) != null ? matcher.group(2).trim() : null;
+            String block = matcher.group(3).trim();
 
-        if (forLoopMatcher.matches()) {
-            String initialization = forLoopMatcher.group(1).trim();
-            String condition = forLoopMatcher.group(2).trim();
-            String update = forLoopMatcher.group(3).trim();
-            String block = forLoopMatcher.group(4).trim();
-
-            // Print translation
-            System.out.println("for (" + initialization + "; " + condition + "; " + update + ") {");
-            System.out.println("\t" + block);
-            System.out.println("}");
-            return true;
-        } else if (whileLoopMatcher.matches()) {
-            String condition = whileLoopMatcher.group(1).trim();
-            String block = whileLoopMatcher.group(2).trim();
-
-            // Print translation
-            System.out.println("while (" + condition + ") {");
+            if (secondExpression != null) {
+                System.out.println("Detected a dual-expression loop:");
+                System.out.println("loop(" + firstExpression + ", " + secondExpression + ") {");
+            } else {
+                System.out.println("Detected a single-expression loop:");
+                System.out.println("loop(" + firstExpression + ") {");
+            }
             System.out.println("\t" + block);
             System.out.println("}");
             return true;
@@ -54,4 +45,6 @@ public class ForLoops {
         }
     }
 
+    
 }
+
