@@ -12,9 +12,9 @@ public class VarAssign {
 	private HashMap<String,String> varTypes= null;
 	private HashMap<String,FuncInfo> funcs= null;
 
-    private Pattern var_assign = Pattern.compile("^(.+)=(.+)$");
+    private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-	private Pattern string = Pattern.compile("\".*\"$");
+	private Pattern string = Pattern.compile("\"\\S*\"$");
 
 
 	// Constructor
@@ -42,8 +42,8 @@ public class VarAssign {
 		if (m.find()) {
 			result += "<var_assign>: " + cmd + "\n";
 			match = true;
-            match = match && parseVal(m.group(2).strip());
-            match = match && parseVar(m.group(1).strip());
+            match = match && parseVal(m.group(2).trim());
+            match = match && parseVar(m.group(1).trim());
         }
 
         return match;
@@ -75,7 +75,7 @@ public class VarAssign {
 				result += "<var>: " + varName;
         	}
 			else if(varTypes.containsKey(cmd)) {
-				result += "Failed to parse: " + cmd + ". Mismatch type assign.\n";
+				result = "Failed to parse: " + cmd + ". Mismatch type assign.\n";
 				match = false;
 			}
 			else {
@@ -85,7 +85,7 @@ public class VarAssign {
 			}
     	}
 		else {
-			result += "Failed to parse: " + cmd + ". Invalid variable name.\n";
+			result = "Failed to parse: " + cmd + ". Invalid variable name.\n";
 		}
 
         return match;
@@ -145,7 +145,7 @@ public class VarAssign {
 			result += "<val>: " + val + "\n";
 		}
 		else {
-			result += "Failed to parse: " + cmd + ". Invalid value to assign.\n";
+			result = "Failed to parse: " + cmd + ". Invalid value to assign.\n";
 		}
 
         return match;
