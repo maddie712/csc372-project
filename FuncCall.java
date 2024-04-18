@@ -13,7 +13,7 @@ public class FuncCall {
 	private HashMap<String,FuncInfo> funcs= null;
     
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
-    private Pattern func_call = Pattern.compile("^(.+)\\s*\\(((.*))\\)\\s*$"); 
+    private Pattern func_call = Pattern.compile("^(.+)\\s*\\((.*)\\)\\s*$"); 
     private Pattern string = Pattern.compile("\".*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 
@@ -92,14 +92,16 @@ public class FuncCall {
         else
             argsArr = cmd.split(",");  // splits arguments by commas
         
-        if (argsArr.length==fn.paramTypes.size()) {
+        if (argsArr.length==fn.params.size()) {
             match = true;
-            for(String arg: argsArr) {
-                if(fn.paramTypes.containsKey(arg) && fn.paramTypes.get(arg).equals(getType(arg))) {
+            for(int i = 0; i < argsArr.length; i++) {
+                String param = fn.params.get(i);
+                String argType = getType(argsArr[i]);
+                if(varTypes.containsKey(param) && varTypes.get(param).equals(argType)) {
                     
                 }
-                else if (!fn.paramTypes.containsKey(arg)){
-                    result += "Failed to parse: '" + arg + "'. Invalid arg value.\n";
+                else {
+                    result += "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
                     return false;
                 }
             }
