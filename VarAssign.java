@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,6 +23,9 @@ public class VarAssign {
 		this.funcs = funcs;
 	}
 
+
+	// Public Methods
+
 	/* 
 	 * Parses a variable assignment line according to the grammar for 
 	 * <var_assign>. 
@@ -33,19 +35,30 @@ public class VarAssign {
 		varName = "";
 		type = "";
 		val = "";
-
+		result = "";
+		
         Matcher m = var_assign.matcher(cmd);
 		boolean match = false;
 		if (m.find()) {
+			result += "<var_assign>: " + cmd + "\n";
 			match = true;
             match = match && parseVal(m.group(2).strip());
             match = match && parseVar(m.group(1).strip());
-			
-			result = javaTranslate();
         }
 
         return match;
     }
+
+	/*
+	 * Translates the var assign line to java syntax.
+	 * Assumes parseCmd() was successful.
+	 */
+	public String translate() {
+		return type + " " + varName + " = " + val + ";\n";
+	}
+
+
+	// Private Methods
 
 	/* 
 	 * Parses the variable name of a variable assignment. If a variable of that
@@ -54,20 +67,26 @@ public class VarAssign {
 	 */
     private boolean parseVar(String cmd) {
 		Matcher m = var.matcher(cmd);
-		boolean match = false;
+		match = false;
 		if(m.find()) {
 			match = true;
         	if(varTypes.containsKey(cmd) && varTypes.get(cmd).equals(type)) {
 				varName = cmd;
+				result += "<var>: " + varName;
         	}
 			else if(varTypes.containsKey(cmd)) {
+				result += "Failed to parse: " + cmd + ". Mismatch type assign.\n";
 				match = false;
 			}
 			else {
 				varName = cmd;
 				varTypes.put(varName,type);
+				result += "<var>: " + varName;
 			}
     	}
+		else {
+			result += "Failed to parse: " + cmd + ". Invalid variable name.\n";
+		}
 
         return match;
     }
@@ -83,11 +102,10 @@ public class VarAssign {
 		boolean match = false;
 		FuncCall fnCall = new FuncCall();
         if (fnCall.parseCmd(cmd)){
-			type = funcs.get(cmd).type;  // this needs to be error checked
+			type = funcs.get(cmd).type;
 			val = cmd;
 			match = true;
 		}
-		
 		else if (MultDiv.parseCmd(cmd)) { 
 			type = "int";
 			val = cmd;
@@ -119,19 +137,14 @@ public class VarAssign {
 		}
         // still need to check Input
 
+		if(match) {
+			result += "<type>: " + type + "\n";
+			result += "<val>: " + val + "\n";
+		}
+		else {
+			result += "Failed to parse: " + cmd + ". Invalid value to assign.\n";
+		}
+
         return match;
     }
-
-	private String javaTranslate() {
-		return type + " " + varName + " = " + val + ";\n";
-	}
-
-	private void printTranslation() {
-		System.out.print(type + " ");
-		System.out.print(varName + " = ");
-		System.out.print(val);
-		System.out.println(";");
-	}
-
-    
 }
