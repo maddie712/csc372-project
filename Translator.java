@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Parser {
+public class Translator {
 	ArrayList<String> intVars = new ArrayList<>();
 	ArrayList<String> stringVars = new ArrayList<>();
 	ArrayList<String> boolVars = new ArrayList<>();
@@ -23,17 +23,13 @@ public class Parser {
 			reader = new Scanner(inFile);
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine().trim();
-				// parse each individual line
-				boolean match = false; //TODO
+				Line lineParser = new Line();
+				boolean match = lineParser.parseCmd(line);
 				if (match) {
-					//////////
-					// call translate and write to output file
-					outFile.write("");
+					outFile.write(lineParser.translated + "\n");
 				}
 				else {
-					/////////
-					// print error message
-					System.out.println();
+					System.out.println(lineParser.result);
 					System.exit(0);
 				}
 			}
