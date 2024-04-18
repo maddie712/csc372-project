@@ -21,11 +21,11 @@ public class Line {
             translated = print.translated;
             return true;
         }
-        else if (loop.translateLoop(cmd)) {
-            // result = loop.result;
-            // translated = loop.translated;
-            return true;
-        }
+        // else if (loop.translateLoop(cmd)) {
+        //     // result = loop.result;
+        //     // translated = loop.translated;
+        //     return true;
+        // }
         else if (condExpr.translateCondExpr(cmd)) {
             // result = condExpr.result;
             // translated = condExpr.translated;

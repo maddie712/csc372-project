@@ -13,6 +13,11 @@ public class ForLoops {
     public String result = "";
     public String translated = "";
 
+    public boolean parseCmd(String cmd) {
+        match = translateLoop(cmd);
+        return match;
+    }
+
     public boolean translateLoop(String input) {
         Matcher matcher = loopPattern.matcher(input);
         if (matcher.matches()) {
