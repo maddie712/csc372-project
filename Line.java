@@ -1,6 +1,6 @@
 
 public class Line {
-    //private VarAssign varAssign = new VarAssign();
+    private VarAssign varAssign = new VarAssign(null, null);
     //private FuncCall funcCall = new FuncCall();
     private Print print = new Print();
 
@@ -22,13 +22,15 @@ public class Line {
         // else if (funcCall.parseCmd(cmd)) {
             
         // }
-        // else if (varAssign.parseCmd(cmd)) {
-            
-        // }
+        else if (varAssign.parseCmd(cmd)) {
+            result = varAssign.result;
+            translated = varAssign.translate();
+            return true;
+        }
         else {
             result += print.result;
             // result += funcCall.result;
-            // result += varAssign.result;
+            result += varAssign.result;
             return false;
         }
     }

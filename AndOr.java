@@ -80,15 +80,19 @@ public class AndOr {
                     printMsg(match, "<var>", token.trim(), "variable");
                     printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
                 }
-                // else if (comp.parseCmd(token)) {
-
-                // }
+                else if (comp.parseCmd(token)) {
+                    result += comp.result;
+                    translated += comp.translated;
+                }
                 else {
                     result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized integer, variable, or arithmetic operator.\n";
                     return false;
                 }
 
-                if (right) { result += "<paren>: )\n"; }
+                if (right) { 
+                    result += "<paren>: )\n";
+                    translated += ")";
+                }
             }
             if (leftParen != rightParen) {
                 result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
@@ -118,6 +122,7 @@ public class AndOr {
                 leftParen++;
                 token = token.replace("(", "");
                 result += "<paren>: (\n";
+                translated += "(";
             }
             boolean right = false;
             if (token.length() > 0 && token.substring(token.length()-1).equals(")")) {
@@ -137,15 +142,19 @@ public class AndOr {
             else if (token.contains("and") || token.contains("or")) {
                 andOrExpr(token);
             }
-            // else if (comp.parseCmd(token)) {
-                    
-            // }
+            else if (comp.parseCmd(token)) {
+                result += comp.result;
+                translated += comp.translated; 
+            }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized boolean, variable, or boolean expression.\n";
                 return false;
             }
 
-            if (right) {result += "<paren>: )\n"; }
+            if (right) {
+                result += "<paren>: )\n";
+                translated += ")";
+            }
 
             if (leftParen != rightParen) {
                 result = "Failed to parse: { " + cmd + " } " + "is missing a \"(\" or \")\"\n";
@@ -178,8 +187,12 @@ public class AndOr {
     }
     
     private void printMsg(boolean match, String ntName, String cmd, String item) {
-		if (match)
+		if (match) {
 			result += ntName + ": " + cmd + "\n";
+			cmd = cmd.replace("and", "&&").replace("or", "||");
+			translated += cmd;
+		}
+			
 		else
 			result = "Failed to parse: {" + cmd + "} is not a valid " + item + ".\n";
 	}

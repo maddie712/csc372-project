@@ -17,7 +17,7 @@ else {
 
 difference = max - nonmax
 
-while (max) {
+loop(max) {
 	temp = max
 	max = nonmax % max
 	nonmax = temp
