@@ -2,10 +2,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CompExpr {
-    private Pattern comp = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|<|>))\\s*([\\s\\S]+)$");
+    private Pattern comp = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|!=|<|>))\\s*([\\s\\S]+)$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private Pattern op = Pattern.compile("^((>=|<=|==|<|>))$");
+    private Pattern op = Pattern.compile("^((>=|<=|==|!=|<|>))$");
     
     private MultDiv multDiv = new MultDiv();
 
@@ -24,8 +24,8 @@ public class CompExpr {
         if (match) {
             String[] tokens;
             result += "<comparison_expr>: " + cmd + "\n";
-            if (cmd.contains(">=") || cmd.contains("<=")) {
-                tokens = cmd.split("(?<=(=))|(?=(<|>))");
+            if (cmd.contains(">=") || cmd.contains("<=") || cmd.contains("!=")) {
+                tokens = cmd.split("(?<=(=))|(?=(<|>|!))");
             }
             else {
                 tokens = cmd.split("(?<=(==|<|>))|(?=(==|<|>))");
