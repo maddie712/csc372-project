@@ -164,7 +164,7 @@ public class AndOr {
         else if (cmd.contains("and") || cmd.contains("or")) {
             andOrExpr(cmd);
         }
-        return true;
+        return match;
 	}
 
     private boolean variable(String cmd) {
