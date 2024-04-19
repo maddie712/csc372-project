@@ -80,6 +80,12 @@ public class VarAssign {
 				result += "<var>: " + varName;
 				translated = type + " " + varName + translated;
 			}
+			else if (varTypes.get(cmd).equals("undef")) {
+				varName = cmd;
+				varTypes.put(varName,type);
+				result += "<var>: " + varName;
+				translated = varName + translated;
+			}
 			else if (varTypes.get(cmd).equals(type)) {
 				varName = cmd;
 				result += "<var>: " + varName;
@@ -106,7 +112,6 @@ public class VarAssign {
 	 * MultDiv.java is written and the same would be true for Condition.java.
 	 */
     private boolean parseVal(String cmd) {
-		boolean match = true;
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
@@ -147,20 +152,22 @@ public class VarAssign {
 		}
 		// checks for variable assignment and checks var is initialised
 		else if (var.matcher(cmd).find() && varTypes.get(cmd)!=null) {
+			if(varTypes.get(cmd).equals("undef")) {
+				result = "Failed to parse '" + cmd + "'. Need to initialise parameter before using.";
+				return false;
+			}
 			type = varTypes.get(cmd);
 			val = cmd;
 			result += "<var>: " + cmd + "\n";
 		}
 		else {
-			match = false;
 			result = "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
+			return false;
 		}
         // still need to check Input?
 
-		if(match) {
-			translated += " = " + val + ";\n";
-		}
+		translated += " = " + val + ";\n";
 
-        return match;
+        return true;
     }
 }

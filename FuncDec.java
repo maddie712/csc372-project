@@ -10,7 +10,10 @@ public class FuncDec {
     // Class Variables
     public boolean match;
     public String result;
-    public boolean inFunc;
+    public String retResult;
+    public String translated;
+    public String retTranslated;
+    public String name;
 
     private FuncInfo fn= null;
     private String retVal= null;
@@ -30,7 +33,6 @@ public class FuncDec {
     public FuncDec(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
         this.varTypes = varTypes;
         this.funcs = funcs;
-        inFunc = false;
     }
 
 
@@ -42,12 +44,15 @@ public class FuncDec {
     public boolean parseCmd(String cmd) {
         match = false;
         result = "";
+        translated = "";
         fn = null;
+        name = null;
         Matcher m = func_dec.matcher(cmd);
         if(m.find()) {
             result += "<func_dec>: " + cmd + "\n";
             fn = new FuncInfo();
-            fn.name = m.group(1).trim();
+            name = m.group(1).trim();
+            fn.name = name;
             match = true;
             match = match && parseName(fn.name);
             match = match && parseParams(fn, m.group(2).trim());
@@ -62,8 +67,10 @@ public class FuncDec {
     public boolean parseReturn(String cmd) {
         Matcher m = return_ln.matcher(cmd);
         boolean match = false;
+        retResult = "";
+        retTranslated = "";
         if(m.find()) {
-            result += "<return>: " + cmd + "\n";
+            retResult += "<return>: " + cmd + "\n";
             retVal = m.group(1).trim();
             String retType = getType(retVal);
             match = (retType!=null);
@@ -72,9 +79,12 @@ public class FuncDec {
             }
             else {
                 fn.type = retType;
-                result += "<type>: " + retType + "\n";
             }
+            if(match && retTranslated.equals("")) {
+                    retTranslated = "return " + retVal + ";\n";
+                }
         }
+
         return match;
     }
 
@@ -91,15 +101,17 @@ public class FuncDec {
             paramStr += fn.paramTypes.get(param) + " " + param;
         }
 
-        return fn.type + " " + fn.name + "(" + String.join(", ",fn.params) + ") {\n";
+        return fn.type + " " + name + "(" + String.join(", ",fn.params) + ") {\n";
     }
 
     /*
      * Translates a return line into java syntax.
      * Assumes parseReturn was successful.
+     * 
+     * Doesn't translate in parseReturn() so can be used in inner blocks
      */
     public String translateReturn() {
-        return "return " + retVal + ";\n";
+        return retTranslated;
     }
 
     /*
@@ -109,15 +121,17 @@ public class FuncDec {
      */
     public boolean endFunc() {
         boolean match = true;
-        inFunc = false;
+        String headerStr = "";
 
         // if never returns, makes a void function; can be changed to be invalid to match grammar
         if(fn.type==null) {
             fn.type = "void";
         }
+        headerStr += fn.type + " " + name + " (";
+        String paramStr = "";
 
         for(String param:fn.params) {
-            // checks all parameters were assigned values
+            // checks all params were assigned values
             if(fn.paramTypes.get(param).equals("undef")) {
                 if(varTypes.containsKey(param)) {
                     fn.paramTypes.put(param, varTypes.get(param)); // should prob error check this
@@ -127,6 +141,12 @@ public class FuncDec {
                     match = false;
                 }
             }
+            
+            // adds param translation
+            if(!paramStr.equals("")) {
+                paramStr += ", ";
+            }
+            paramStr += fn.paramTypes.get(param) + " " + param;
 
             // removes params from vars and restores old vals if needed
             if(fn.oldVars.containsKey(param)) {
@@ -137,7 +157,13 @@ public class FuncDec {
             }
         }
 
+        headerStr += paramStr + ") {\n";
+        translated = headerStr + translated + "}\n";
         return match;
+    }
+
+    public void addToFuncs() {
+        funcs.put(name, fn);
     }
 
 
@@ -181,12 +207,15 @@ public class FuncDec {
             param = param.trim();
             Matcher m = var.matcher(param);
             if(m.find()) {
+                if(fn.params.contains(param)) {
+                    result = "Failed to parse '" + param + "'. Same parameter name used twice.\n";
+                }
                 if(varTypes.containsKey(param)) {
                     fn.oldVars.put(param, varTypes.get(param));
-                    varTypes.remove(param);
                 }
                 fn.params.add(param); 
                 fn.paramTypes.put(param,"undef");
+                varTypes.put(param,"undef");
             }
             else {
                 result = "Failed to parse: '" + param + "'. Invalid variable name.\n";
@@ -209,35 +238,47 @@ public class FuncDec {
 
         // checks for no (void) return value
         if(cmd.equals("")) {
+            retTranslated = "return;\n";
             return "void";
         }
         // checks for a func call value (null if func dne or is this func)
         else if (fnCall.parseCmd(cmd)){
-            result += "<func_call>: " + cmd + "\n";
+            retResult += "<func_call>: " + cmd + "\n";
+            retTranslated = "return " + fnCall.translated + ";\n";
 			return funcs.get(cmd).type;
 		}
         // checks for int return value
-        else if(md.parseCmd(cmd) || intVal.matcher(cmd).find()){
-            result += "<mult_div>: " + cmd + "\n";
+        else if(md.parseCmd(cmd)){
+            retResult += "<mult_div>: " + cmd + "\n";
+            retTranslated = "return " + md.translated + ";\n";
+			return "int";
+        }
+        else if(intVal.matcher(cmd).find()) {
+            retResult += "<int>: " + cmd + "\n";
 			return "int";
         }
         // checks for boolean return value
-        else if(cond.parseCmd(cmd) || bool.matcher(cmd).find()){
-            result += "<condition>: " + cmd + "\n";
+        else if(cond.parseCmd(cmd)){
+            retResult += "<condition>: " + cmd + "\n";
+            retTranslated = "return " + cond.translated + ";\n";
+			return "boolean";
+        }
+        else if(bool.matcher(cmd).find()){
+            retResult += "<bool>: " + cmd + "\n";
 			return "boolean";
         }
         // checks for string return value
         else if(string.matcher(cmd).find()) {
-            result += "<string>: " + cmd + "\n";
+            retResult += "<string>: " + cmd + "\n";
 			return "String";
         }
         // checks for a variable value (null if variable not declared)
         else if(var.matcher(cmd).find()) {
-            result += "<var>: " + cmd + "\n";
+            retResult += "<var>: " + cmd + "\n";
 			return varTypes.get(cmd);
         }
         else {
-            result = "Failed to parse '" + cmd + "'. Invalid value to return.";
+            retResult = "Failed to parse '" + cmd + "'. Invalid value to return.";
         }
 
         return null;

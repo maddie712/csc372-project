@@ -1,0 +1,15 @@
+func foo() {
+    return 5
+}
+
+func bar(x,y) {
+    x = 10
+    y = foo()
+    return x*y
+}
+
+func baz(x,y) {
+    x = true
+    y = false or x
+    return x and y
+}
