@@ -7,8 +7,8 @@ public class FuncCall {
     public boolean match;
     public String result;
     public String translated;
+    public FuncInfo func= null;
 
-    private FuncInfo fn= null;
     private String args= null;
     private HashMap<String,String> varTypes= null;
 	private HashMap<String,FuncInfo> funcs= null;
@@ -36,11 +36,12 @@ public class FuncCall {
         result = "";
         translated = "";
         args = "";
+        func = null;
         if(m.find()) {
             result += "<func_call>: " + cmd + "\n";
             String name = m.group(1).trim();
             match = parseName(name);
-            match = match && parseArgs(fn, m.group(2).trim());
+            match = match && parseArgs(m.group(2).trim());
         }
 
         return match;
@@ -51,7 +52,7 @@ public class FuncCall {
      * Does not add newline or ; to end because can be inline
      */
     public String translate() {
-        return fn.name + "(" + args + ")";
+        return func.name + "(" + args + ")";
     }
         
     // Private Methods
@@ -62,8 +63,8 @@ public class FuncCall {
     private boolean parseName(String cmd) {
         Matcher m = func_name.matcher(cmd);
         if(m.find()) {
-            if (funcs.containsKey(cmd)) {  // method must exist to call
-                fn = funcs.get(cmd);
+            func = funcs.get(cmd);
+            if (func!=null) {  // method must exist to call
                 result += "<func>: " + cmd + "\n";
                 translated += cmd;
                 return true;
@@ -81,7 +82,7 @@ public class FuncCall {
     /*
      * Parses and validates the arguments of a function call.
      */
-    private boolean parseArgs(FuncInfo fn, String cmd) {
+    private boolean parseArgs(String cmd) {
         boolean match = false;
         String[] argsArr;
 
@@ -90,12 +91,12 @@ public class FuncCall {
         else
             argsArr = cmd.split(",");  // splits arguments by commas
         
-        if (argsArr.length==fn.params.size()) {
+        if (argsArr.length==func.params.size()) {
             match = true;
             for(int i = 0; i < argsArr.length; i++) {
-                String param = fn.params.get(i);
+                String param = func.params.get(i);
                 String argType = getType(argsArr[i]);
-                if(!(fn.paramTypes.get(param).equals(argType))) {
+                if(!(func.paramTypes.get(param).equals(argType))) {
                     result = "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
                     return false;
                 }

@@ -87,12 +87,12 @@ public class VarAssign {
         	}
 			// if var already exists but with different type assignment
 			else {
-				result += "Failed to parse: " + cmd + ". Mismatch type assign.\n";
+				result = "Failed to parse '" + cmd + "'. Mismatch type assign.\n";
 				match = false;
 			}
     	}
 		else {
-			result = "Failed to parse: " + cmd + ". Invalid variable name.\n";
+			result = "Failed to parse '" + cmd + "'. Invalid variable name.\n";
 		}
 
         return match;
@@ -113,7 +113,7 @@ public class VarAssign {
 
 		// checks for func call assignment
         if (fnCall.parseCmd(cmd)){
-			type = funcs.get(cmd).type;
+			type = fnCall.func.type;
 			val = fnCall.translated;
 			result += "<func_call>: " + cmd + "\n";
 		}
@@ -153,7 +153,7 @@ public class VarAssign {
 		}
 		else {
 			match = false;
-			result = "Failed to parse: " + cmd + ". Invalid value to assign.\n";
+			result = "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
 		}
         // still need to check Input?
 
