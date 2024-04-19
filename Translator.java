@@ -18,9 +18,11 @@ public class Translator {
 		in.close();
 
 		File inFile = new File(filename);
-		String newFilename = filename.split("\\.")[0];
+		String newFilename = filename.split("\\.")[0].replace("\\", "").replace("/", "");
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("public class " + newFilename + "{\n");
+		///// TEMPORARY
+		outFile.write("\tpublic static void main(String[] args) {\n");
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -68,14 +70,16 @@ public class Translator {
 					Line lineParser = new Line();
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
-						outFile.write(lineParser.translated + "\n");
+						outFile.write("\t\t" + lineParser.translated + "\n");
 					}
 					else {
 						System.exit(0);
 					}
 				}
 			}
-			outFile.write("}");
+			////// TEMPORARY
+			outFile.write("\t}\n");
+			outFile.write("}\n");
 			reader.close();
 			outFile.close();
 		} catch (FileNotFoundException e) {
