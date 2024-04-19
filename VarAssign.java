@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 public class VarAssign {
 	public boolean match;
 	public String result;
+	public String translated;
 
     private String varName= null;
     private String type= null;
@@ -15,7 +16,8 @@ public class VarAssign {
     private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
-	private Pattern string = Pattern.compile("\"\\S*\"$");
+	private Pattern bool = Pattern.compile("^true$|^false$");
+	private Pattern string = Pattern.compile("\".*\"$");
 
 
 	// Constructor
@@ -37,6 +39,7 @@ public class VarAssign {
 		type = "";
 		val = "";
 		result = "";
+		translated = "";
 		
         Matcher m = var_assign.matcher(cmd);
 		boolean match = false;
@@ -55,7 +58,7 @@ public class VarAssign {
 	 * Assumes parseCmd() was successful.
 	 */
 	public String translate() {
-		return type + " " + varName + " = " + val + ";\n";
+		return translated;
 	}
 
 
@@ -75,10 +78,12 @@ public class VarAssign {
 				varName = cmd;
 				varTypes.put(varName,type);
 				result += "<var>: " + varName;
+				translated = type + " " + varName + translated;
 			}
 			else if (varTypes.get(cmd).equals(type)) {
 				varName = cmd;
 				result += "<var>: " + varName;
+				translated = varName + translated;
         	}
 			// if var already exists but with different type assignment
 			else {
@@ -101,54 +106,59 @@ public class VarAssign {
 	 * MultDiv.java is written and the same would be true for Condition.java.
 	 */
     private boolean parseVal(String cmd) {
-		boolean match = false;
+		boolean match = true;
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
-		Matcher m = intVal.matcher(cmd);
 
+		// checks for func call assignment
         if (fnCall.parseCmd(cmd)){
 			type = funcs.get(cmd).type;
-			val = cmd;
-			match = true;
+			val = fnCall.translated;
+			result += "<func_call>: " + cmd + "\n";
 		}
-		else if (md.parseCmd(cmd) || m.find()) { 
+		// checks for int assignment
+		else if (md.parseCmd(cmd)) { 
+			type = "int";
+			val = md.translated;
+			result += "<mult_div>: " + cmd + "\n";
+		}
+		else if (intVal.matcher(cmd).find()) { 
 			type = "int";
 			val = cmd;
-			match = true;
+			result += "<int>: " + cmd + "\n";
 		}
+		// checks for boolean assignment
 		else if (cond.parseCmd(cmd)) {
 			type = "boolean";
+			val = cond.translated;
+			result += "<condition>: " + cmd + "\n";
+		}
+		else if (bool.matcher(cmd).find()) {
+			type = "boolean";
 			val = cmd;
-			match = true;
+			result += "<bool>: " + cmd + "\n";
+		}
+		// checks for string assignment
+		else if (string.matcher(cmd).find()) {
+			type = "String";
+			val = cmd;
+			result += "<string>: " + cmd + "\n";
+		}
+		// checks for variable assignment and checks var is initialised
+		else if (var.matcher(cmd).find() && varTypes.get(cmd)!=null) {
+			type = varTypes.get(cmd);
+			val = cmd;
+			result += "<var>: " + cmd + "\n";
 		}
 		else {
-			m = string.matcher(cmd);
-			if(m.find()) {
-				type = "String";
-				val = cmd;
-				match = true;
-			}
-			else {
-				// Checks if the value is a variable
-				m = var.matcher(cmd);
-				if(m.find()) {
-					type = varTypes.get(cmd);
-					if (type!=null) { // if value var already declared
-						val = cmd;
-						match = true;
-					}
-				}
-			}
+			match = false;
+			result = "Failed to parse: " + cmd + ". Invalid value to assign.\n";
 		}
-        // still need to check Input
+        // still need to check Input?
 
 		if(match) {
-			result += "<type>: " + type + "\n";
-			result += "<val>: " + val + "\n";
-		}
-		else {
-			result = "Failed to parse: " + cmd + ". Invalid value to assign.\n";
+			translated += " = " + val + ";\n";
 		}
 
         return match;
