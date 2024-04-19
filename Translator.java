@@ -26,13 +26,22 @@ public class Translator {
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("import java.util.Scanner;\n");
 		outFile.write("public class " + newFilename + " {\n");
-		///// TEMPORARY
-		outFile.write("public static void main(String[] args) {\n");
+
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
+
+			// func decs should all be at the top of the file so parse for first
+			FuncDec fn = new FuncDec(varTypes, funcs);
+			parseFuncs(reader, fn, outFile);
+			
+			///// TEMPORARY
+			outFile.write("public static void main(String[] args) {\n");
+
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine().trim();
+
+
 				if (line.equals("")) { continue; }
 				if (line.contains("loop(")) {
 					String loopBlock = buildBlock(line, reader);
@@ -58,17 +67,9 @@ public class Translator {
 						System.exit(0);
 					}
 				}
-				else if (line.startsWith("func ")) {
-					FuncDec fn = new FuncDec(varTypes, funcs);
-
-					if (funcHelper(line, reader, fn)) {
-						System.out.println(fn.translated);
-						outFile.write(fn.translated);
-					}
-					else {
-						System.out.println(fn.result);
-						System.exit(0);
-					}
+				else if (fn.parseCmd(line)) {
+					System.out.println("Failed to parse '" + line + "'. Functions must be initialised before rest of code.");
+					System.exit(0);
 				}
 				else {
 					Line lineParser = new Line(varTypes,funcs);
@@ -118,6 +119,34 @@ public class Translator {
 		return result;
 	}
 
+	/*
+	 * Handles parsing through all funcs (if any) declared at top of file input.
+	 */
+	public static void parseFuncs(Scanner reader, FuncDec fn, FileWriter outFile) throws IOException{
+		while (reader.hasNextLine()) {
+			String line = reader.nextLine().trim();
+			if(fn.parseCmd(line)) {
+				// reads through the func that starts on the current line
+				if (funcHelper(line, reader, fn)) {
+					System.out.println(fn.translated);
+					outFile.write(fn.translated);
+				}
+				// returns when stops receiving funcs (no more at top of file)
+				else if (fn.result.isEmpty()) {
+					return;
+				}
+				// exits if there is an error in the current func
+				else {
+					System.out.println(fn.result);
+					System.exit(0);
+				}
+			}
+		}
+	}
+
+	/*
+	 * Handles parsing through a function.
+	 */
 	public static boolean funcHelper(String line, Scanner reader, FuncDec fn) {
 		// parse header to validate
 		if(!fn.parseCmd(line)) {
@@ -182,6 +211,9 @@ public class Translator {
 		}		
 	}
 
+	/*
+	 * Handles parsing through a loop in a function body.
+	 */
 	public static String[] loopHelper(String line, Scanner reader, FuncDec fn) {
 		//boolean inFunc = fn!=null;
 		ForLoops loopBlock = new ForLoops();
@@ -236,6 +268,9 @@ public class Translator {
 		return ret;
 	} 
 
+	/*
+	 * Handles parsing through a cond expr in a function body.
+	 */
 	public static String[] condExprHelper(String line, Scanner reader, FuncDec fn) {
 		//boolean inFunc = fn!=null;
 		CondExpr condBlock = new CondExpr();
