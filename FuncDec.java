@@ -20,6 +20,8 @@ public class FuncDec {
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
     private Pattern func_dec = Pattern.compile("^func (.+)\\s*\\((.*)\\)\\s*\\{$");
 	private Pattern return_ln = Pattern.compile("^return( .+)*$");
+	private Pattern intVal = Pattern.compile("^\\d+$");
+	private Pattern bool = Pattern.compile("^true$|^false$");
     private Pattern string = Pattern.compile("\".*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 
@@ -45,10 +47,10 @@ public class FuncDec {
         if(m.find()) {
             result += "<func_dec>: " + cmd + "\n";
             fn = new FuncInfo();
-            fn.name = m.group(1).strip();
+            fn.name = m.group(1).trim();
             match = true;
             match = match && parseName(fn.name);
-            match = match && parseParams(fn, m.group(2).strip());
+            match = match && parseParams(fn, m.group(2).trim());
         }
         
         return match;
@@ -62,7 +64,7 @@ public class FuncDec {
         boolean match = false;
         if(m.find()) {
             result += "<return>: " + cmd + "\n";
-            retVal = m.group(1).strip();
+            retVal = m.group(1).trim();
             String retType = getType(retVal);
             match = (retType!=null);
             if(fn.type!=null) {
@@ -121,7 +123,7 @@ public class FuncDec {
                     fn.paramTypes.put(param, varTypes.get(param)); // should prob error check this
                 }
                 else {
-                    result += "Failed to parse '" + param + "'. Paremeter never initialized.\n";
+                    result = "Failed to parse '" + param + "'. Paremeter never initialized.\n";
                     match = false;
                 }
             }
@@ -152,11 +154,11 @@ public class FuncDec {
                 return true;
             }
             else {
-                result += "Failed to parse: '" + cmd + "'. Function already exists.\n";
+                result = "Failed to parse: '" + cmd + "'. Function already exists.\n";
             }
         }
         else {
-            result += "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+            result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
         }
         return false;
     }
@@ -176,7 +178,7 @@ public class FuncDec {
 
         String[] params = paramsStr.split(",");
         for(String param: params) {
-            param = param.strip();
+            param = param.trim();
             Matcher m = var.matcher(param);
             if(m.find()) {
                 if(varTypes.containsKey(param)) {
@@ -187,13 +189,13 @@ public class FuncDec {
                 fn.paramTypes.put(param,"undef");
             }
             else {
-                result += "Failed to parse: '" + param + "'. Invalid variable name.\n";
+                result = "Failed to parse: '" + param + "'. Invalid variable name.\n";
                 return false;
             }
         }
 
         String paramsFmt = String.join(", ",fn.params);
-        result += "<params>: (" + paramsFmt + ")\n";
+        result += "<params>: " + paramsFmt + "\n";
         return true;
     }
 
@@ -201,35 +203,43 @@ public class FuncDec {
      * Gets the type of a (return) value.
      */
     private String getType(String cmd) {
-        String type = null;
         FuncCall fnCall = new FuncCall(varTypes,funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
 
-        if (fnCall.parseCmd(cmd)){
-			type = funcs.get(cmd).type;
-		}
-        else if(md.parseCmd(cmd)){
-			type = "int";
+        // checks for no (void) return value
+        if(cmd.equals("")) {
+            return "void";
         }
-        else if(cond.parseCmd(cmd)){
-			type = "boolean";
+        // checks for a func call value (null if func dne or is this func)
+        else if (fnCall.parseCmd(cmd)){
+            result += "<func_call>: " + cmd + "\n";
+			return funcs.get(cmd).type;
+		}
+        // checks for int return value
+        else if(md.parseCmd(cmd) || intVal.matcher(cmd).find()){
+            result += "<mult_div>: " + cmd + "\n";
+			return "int";
+        }
+        // checks for boolean return value
+        else if(cond.parseCmd(cmd) || bool.matcher(cmd).find()){
+            result += "<condition>: " + cmd + "\n";
+			return "boolean";
+        }
+        // checks for string return value
+        else if(string.matcher(cmd).find()) {
+            result += "<string>: " + cmd + "\n";
+			return "String";
+        }
+        // checks for a variable value (null if variable not declared)
+        else if(var.matcher(cmd).find()) {
+            result += "<var>: " + cmd + "\n";
+			return varTypes.get(cmd);
         }
         else {
-            Matcher m = string.matcher(cmd);
-            if(m.find()) {
-			    type = "String";
-            }
-            else {
-                m = var.matcher(cmd);
-                if(m.find()) {
-                    if(varTypes.containsKey(cmd)) {
-			            type = varTypes.get(cmd);
-                    }
-                }
-            }
+            result = "Failed to parse '" + cmd + "'. Invalid value to return.";
         }
 
-        return type;
+        return null;
     }
 }

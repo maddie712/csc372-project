@@ -6,6 +6,7 @@ public class FuncCall {
     // Class Variables
     public boolean match;
     public String result;
+    public String translated;
 
     private FuncInfo fn= null;
     private String args= null;
@@ -13,7 +14,9 @@ public class FuncCall {
 	private HashMap<String,FuncInfo> funcs= null;
     
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
-    private Pattern func_call = Pattern.compile("^(.+)\\s*\\((.*)\\)\\s*$"); 
+    private Pattern func_call = Pattern.compile("^(.+)\\s*\\((.*)\\)\\s*$");
+	private Pattern intVal = Pattern.compile("^\\d+$");
+	private Pattern bool = Pattern.compile("^true$|^false$"); 
     private Pattern string = Pattern.compile("\".*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 
@@ -31,21 +34,13 @@ public class FuncCall {
         Matcher m = func_call.matcher(cmd);
         match = false;
         result = "";
+        translated = "";
         args = "";
         if(m.find()) {
             result += "<func_call>: " + cmd + "\n";
-            String name = m.group(1).strip();
+            String name = m.group(1).trim();
             match = parseName(name);
-            if(match && funcs.containsKey(name)) {
-                fn = funcs.get(name);
-                match = match && parseArgs(fn, m.group(2).strip());
-            }
-            else if(match) {
-                result += "Failed to parse: '" + name + "'. Function does not exist.\n";
-                match = false;
-            }
-
-            
+            match = match && parseArgs(fn, m.group(2).trim());
         }
 
         return match;
@@ -68,7 +63,9 @@ public class FuncCall {
         Matcher m = func_name.matcher(cmd);
         if(m.find()) {
             if (funcs.containsKey(cmd)) {  // method must exist to call
+                fn = funcs.get(cmd);
                 result += "<func>: " + cmd + "\n";
+                translated += cmd;
                 return true;
             }
             else {
@@ -87,6 +84,7 @@ public class FuncCall {
     private boolean parseArgs(FuncInfo fn, String cmd) {
         boolean match = false;
         String[] argsArr;
+
         if(cmd.equals(""))  // handles if no arguments given
             argsArr = new String[0];
         else
@@ -97,15 +95,15 @@ public class FuncCall {
             for(int i = 0; i < argsArr.length; i++) {
                 String param = fn.params.get(i);
                 String argType = getType(argsArr[i]);
-                if(varTypes.containsKey(param) && varTypes.get(param).equals(argType)) {
-                    
-                }
-                else {
-                    result += "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
+                if(!(fn.paramTypes.get(param).equals(argType))) {
+                    result = "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
                     return false;
                 }
             }
+            // updates values if all args are valid
             args = String.join(", ", argsArr);
+            result += "<args>: " + args + "\n";
+            translated += "(" + args + ")";
         }
 
         return match;
@@ -118,28 +116,20 @@ public class FuncCall {
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
 
-        if(md.parseCmd(arg)){
+        if(md.parseCmd(arg) || intVal.matcher(arg).find()){
             return "int";
         }
-        else if(cond.parseCmd(arg)){
+        else if(cond.parseCmd(arg) || bool.matcher(arg).find()){
             return "boolean";
         }
-        else {
-            Matcher m = string.matcher(arg);
-            if(m.find()) {
-                return "String";
-            }
-            else {
-                m = var.matcher(arg);
-                if(m.find()) {
-                    if(varTypes.containsKey(arg)) {
-                        return varTypes.get(arg);
-                    }
-                }
-            }
+        else if(string.matcher(arg).find()) {
+            return "String";
+        }
+        else if(var.matcher(arg).find() && varTypes.containsKey(arg)) {
+            return varTypes.get(arg);                
         }
 
-        result += "Failed to parse: '" + arg + "'. Invalid arg value.\n";
+        result = "Failed to parse: '" + arg + "'. Invalid arg value.\n";
         return "";
     }
 }
