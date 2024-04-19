@@ -73,11 +73,9 @@ public class AndOr {
                 }
                 else if (bool(token)) {
                     printMsg(match, "<bool>", token.trim(), "boolean");
-                    printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
                 }
                 else if (variable(token)) {
                     printMsg(match, "<var>", token.trim(), "variable");
-                    printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
                 }
                 else if (comp.parseCmd(token)) {
                     result += comp.result;
@@ -132,11 +130,9 @@ public class AndOr {
 
             if (bool(token)) {
                 printMsg(match, "<bool>", token.trim(), "boolean");
-                printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
             }
             else if (variable(token)){
                 printMsg(match, "<var>", token.trim(), "variable");
-                printMsg(match, "<bool_expr>", token.trim(), "boolean expression");
             }
             else if (token.contains("and") || token.contains("or")) {
                 andOrExpr(token);

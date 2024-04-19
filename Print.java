@@ -18,7 +18,7 @@ public class Print {
         match = print(cmd);
         if (!match) {
             result = "";
-            translated = "";
+            translated = "System.out.print";
             match = println(cmd);
         }
         return match;
@@ -51,12 +51,12 @@ public class Print {
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
-                translated += token + ");";
+                translated += multDiv.translated + ");";
                 return true;
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
-                translated += token + ");";
+                translated += condition.translated + ");";
                 return true;
             }
             else {
@@ -95,11 +95,11 @@ public class Print {
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
-                translated += token + ");";
+                translated += multDiv.translated + ");";
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
-                translated += token + ");";
+                translated += condition.translated + ");";
             }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";

@@ -22,7 +22,11 @@ public class Translator {
 		in.close();
 
 		File inFile = new File(filename);
-		FileWriter outFile = initializeFile(filename);
+		String newFilename = filename.split("\\.")[0].replace("\\", "").replace("/", "");
+		FileWriter outFile = new FileWriter(newFilename + ".java");
+		outFile.write("public class " + newFilename + "{\n");
+		///// TEMPORARY
+		outFile.write("\tpublic static void main(String[] args) {\n");
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -69,34 +73,24 @@ public class Translator {
 				else {
 					Line lineParser = new Line();
 					boolean match = lineParser.parseCmd(line);
-					System.out.println(lineParser.result);
 					if (match) {
-						outFile.write(lineParser.translated + "\n");
+						outFile.write("\t\t" + lineParser.translated + "\n");
 					}
 					else {
 						System.exit(0);
 					}
 				}
 			}
-			outFile.write("}");
+			////// TEMPORARY
+			outFile.write("\t}\n");
+			outFile.write("}\n");
 			reader.close();
+			outFile.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Cannot find the specified file, please try again.");
 		}
 	}
 
-	public static FileWriter initializeFile(String oldFilename) {
-		String newFilename = oldFilename.split("\\.")[0];
-		FileWriter out;
-		try {
-			out = new FileWriter(newFilename + ".java");
-			out.write("public class " + newFilename + "{");
-			return out;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	public static String buildBlock(String firstLine, Scanner in) {
 		String result = firstLine + "\n";
