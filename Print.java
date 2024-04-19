@@ -16,6 +16,9 @@ public class Print {
     public String translated = "System.out.print";
 
     public boolean parseCmd(String cmd) {
+        result = "";
+        translated = "System.out.print";
+        
         match = print(cmd);
         if (!match) {
             result = "";

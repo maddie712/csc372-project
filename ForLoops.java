@@ -26,6 +26,9 @@ public class ForLoops {
 
 
     public boolean parseCmd(String cmd) {
+        result = "";
+        translated = "";
+        
         match = translateLoop(cmd);
         return match;
     }
