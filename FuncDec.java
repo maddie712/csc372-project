@@ -12,6 +12,8 @@ public class FuncDec {
     public String result;
     public String retResult;
     public String translated;
+    public String retTranslated;
+    public String name;
 
     private FuncInfo fn= null;
     private String retVal= null;
@@ -42,12 +44,15 @@ public class FuncDec {
     public boolean parseCmd(String cmd) {
         match = false;
         result = "";
+        translated = "";
         fn = null;
+        name = null;
         Matcher m = func_dec.matcher(cmd);
         if(m.find()) {
             result += "<func_dec>: " + cmd + "\n";
             fn = new FuncInfo();
-            fn.name = m.group(1).trim();
+            name = m.group(1).trim();
+            fn.name = name;
             match = true;
             match = match && parseName(fn.name);
             match = match && parseParams(fn, m.group(2).trim());
@@ -63,6 +68,7 @@ public class FuncDec {
         Matcher m = return_ln.matcher(cmd);
         boolean match = false;
         retResult = "";
+        retTranslated = "";
         if(m.find()) {
             retResult += "<return>: " + cmd + "\n";
             retVal = m.group(1).trim();
@@ -74,6 +80,9 @@ public class FuncDec {
             else {
                 fn.type = retType;
             }
+            if(match && retTranslated.equals("")) {
+                    retTranslated = "return " + retVal + ";\n";
+                }
         }
 
         return match;
@@ -92,15 +101,17 @@ public class FuncDec {
             paramStr += fn.paramTypes.get(param) + " " + param;
         }
 
-        return fn.type + " " + fn.name + "(" + String.join(", ",fn.params) + ") {\n";
+        return fn.type + " " + name + "(" + String.join(", ",fn.params) + ") {\n";
     }
 
     /*
      * Translates a return line into java syntax.
      * Assumes parseReturn was successful.
+     * 
+     * Doesn't translate in parseReturn() so can be used in inner blocks
      */
     public String translateReturn() {
-        return "return " + retVal + ";\n";
+        return retTranslated;
     }
 
     /*
@@ -116,7 +127,7 @@ public class FuncDec {
         if(fn.type==null) {
             fn.type = "void";
         }
-        headerStr += fn.type + " " + fn.name + " (";
+        headerStr += fn.type + " " + name + " (";
         String paramStr = "";
 
         for(String param:fn.params) {
@@ -147,8 +158,12 @@ public class FuncDec {
         }
 
         headerStr += paramStr + ") {\n";
-        translated = headerStr + translated;
+        translated = headerStr + translated + "}\n";
         return match;
+    }
+
+    public void addToFuncs() {
+        funcs.put(name, fn);
     }
 
 
@@ -192,12 +207,15 @@ public class FuncDec {
             param = param.trim();
             Matcher m = var.matcher(param);
             if(m.find()) {
+                if(fn.params.contains(param)) {
+                    result = "Failed to parse '" + param + "'. Same parameter name used twice.\n";
+                }
                 if(varTypes.containsKey(param)) {
                     fn.oldVars.put(param, varTypes.get(param));
-                    varTypes.remove(param);
                 }
                 fn.params.add(param); 
                 fn.paramTypes.put(param,"undef");
+                varTypes.put(param,"undef");
             }
             else {
                 result = "Failed to parse: '" + param + "'. Invalid variable name.\n";
@@ -220,21 +238,33 @@ public class FuncDec {
 
         // checks for no (void) return value
         if(cmd.equals("")) {
+            retTranslated = "return;\n";
             return "void";
         }
         // checks for a func call value (null if func dne or is this func)
         else if (fnCall.parseCmd(cmd)){
             retResult += "<func_call>: " + cmd + "\n";
+            retTranslated = "return " + fnCall.translated + ";\n";
 			return funcs.get(cmd).type;
 		}
         // checks for int return value
-        else if(md.parseCmd(cmd) || intVal.matcher(cmd).find()){
+        else if(md.parseCmd(cmd)){
             retResult += "<mult_div>: " + cmd + "\n";
+            retTranslated = "return " + md.translated + ";\n";
+			return "int";
+        }
+        else if(intVal.matcher(cmd).find()) {
+            retResult += "<int>: " + cmd + "\n";
 			return "int";
         }
         // checks for boolean return value
-        else if(cond.parseCmd(cmd) || bool.matcher(cmd).find()){
+        else if(cond.parseCmd(cmd)){
             retResult += "<condition>: " + cmd + "\n";
+            retTranslated = "return " + cond.translated + ";\n";
+			return "boolean";
+        }
+        else if(bool.matcher(cmd).find()){
+            retResult += "<bool>: " + cmd + "\n";
 			return "boolean";
         }
         // checks for string return value
