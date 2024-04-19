@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -6,12 +7,22 @@ public class CondExpr {
     private Pattern ifPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
 
     private Condition cond = new Condition();
-    private Line line1 = new Line();
-    private Line line2 = new Line();
+    private Line line1 = null;
+    private Line line2 = null;
 
     public boolean match;
     public String result = "";
     public String translated = "";
+
+    public CondExpr() {
+        line1 = new Line();
+        line2 = new Line();
+    }
+
+    public CondExpr(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        line1 = new Line(varTypes, funcs);
+        line2 = new Line(varTypes, funcs);
+    }
 
     public boolean parseCmd(String cmd) {
         match = translateCondExpr(cmd);
@@ -29,7 +40,7 @@ public class CondExpr {
 
             if (cond.parseCmd(condition)) {
                 result += "<if_dec>: if (" + condition + ") {";
-                translated += "if (" + cond.translated + ") {";
+                translated += "if (" + cond.translated + ") {\n";
             }
             else {
                 result = "Failed to parse: {" + input + "} is not a valid conditional expression.\n";
@@ -48,7 +59,7 @@ public class CondExpr {
 
             result += "<block>: \n";
             result += line1.result;
-            translated += line1.translated + "}\n";
+            translated += line1.translated + "}\nelse {\n";
 
             result += "<else>: } else {\n";
 
@@ -71,7 +82,7 @@ public class CondExpr {
 
             if (cond.parseCmd(condition)) {
                 result += "<if_dec>: if (" + condition + ") {";
-                translated += "if (" + cond.translated + ") {";
+                translated += "if (" + cond.translated + ") {\n";
             }
             else {
                 result = "Failed to parse: {" + input + "} is not a valid conditional expression.\n";

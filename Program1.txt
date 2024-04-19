@@ -22,6 +22,7 @@ loop(max) {
 	max = nonmax % max
 	nonmax = temp
 }
+
 gcd = nonmax
 
 lcm = first * second / gcd

@@ -34,7 +34,7 @@ public class Translator {
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine().trim();
 				if (line.equals("")) { continue; }
-				if (line.contains("loop")) {
+				if (line.contains("loop(")) {
 					String loopBlock = buildBlock(line, reader);
 					ForLoops loop = new ForLoops();
 					if (loop.parseCmd(loopBlock)) {
@@ -46,11 +46,11 @@ public class Translator {
 						System.exit(0);
 					}
 				}
-				else if (line.contains("if")) {
+				else if (line.contains("if ")) {
 					String ifElseBlock = buildBlock(line, reader);
-					CondExpr condExpr = new CondExpr();
+					CondExpr condExpr = new CondExpr(varTypes,funcs);
 					if (condExpr.parseCmd(ifElseBlock)) {
-						System.out.println(condExpr.result);
+						System.out.println(condExpr.translated);
 						outFile.write(condExpr.translated + "\n");
 					}
 					else {
@@ -62,7 +62,7 @@ public class Translator {
 					FuncDec fn = new FuncDec(varTypes, funcs);
 
 					if (funcHelper(line, reader, fn)) {
-						System.out.println(fn.result);
+						System.out.println(fn.translated);
 						outFile.write(fn.translated + "\n");
 					}
 					else {
@@ -74,6 +74,7 @@ public class Translator {
 					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
+						System.out.println(lineParser.translated);
 						outFile.write("\t\t" + lineParser.translated + "\n");
 					}
 					else {
@@ -98,15 +99,21 @@ public class Translator {
 		stack.push("{");
 
 		while (!stack.empty()) {
-			String cur = in.nextLine();
+			String cur = in.nextLine().trim();
 			if (cur.contains("{")) {
 				stack.push("{");
 			}
 			if (cur.contains("}")) {
 				stack.pop();
 			}
+
 			result += cur + "\n";
+
+			if (in.hasNext("\\s*else\\s*.*")) {
+				result += buildBlock(in.nextLine(), in);
+			}
 		}
+
 		return result;
 	}
 
