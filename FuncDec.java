@@ -22,7 +22,7 @@ public class FuncDec {
 	private Pattern return_ln = Pattern.compile("^return( .+)*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern bool = Pattern.compile("^true$|^false$");
-    private Pattern string = Pattern.compile("\".*\"$");
+    private Pattern string = Pattern.compile("^\"[^\"]*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 
 
