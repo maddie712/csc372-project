@@ -18,7 +18,9 @@ public class Translator {
 		in.close();
 
 		File inFile = new File(filename);
-		FileWriter outFile = initializeFile(filename);
+		String newFilename = filename.split("\\.")[0];
+		FileWriter outFile = new FileWriter(newFilename + ".java");
+		outFile.write("public class " + newFilename + "{\n");
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -65,7 +67,6 @@ public class Translator {
 				else {
 					Line lineParser = new Line();
 					boolean match = lineParser.parseCmd(line);
-					System.out.println(lineParser.result);
 					if (match) {
 						outFile.write(lineParser.translated + "\n");
 					}
@@ -76,23 +77,12 @@ public class Translator {
 			}
 			outFile.write("}");
 			reader.close();
+			outFile.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Cannot find the specified file, please try again.");
 		}
 	}
 
-	public static FileWriter initializeFile(String oldFilename) {
-		String newFilename = oldFilename.split("\\.")[0];
-		FileWriter out;
-		try {
-			out = new FileWriter(newFilename + ".java");
-			out.write("public class " + newFilename + "{");
-			return out;
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	public static String buildBlock(String firstLine, Scanner in) {
 		String result = firstLine + "\n";
