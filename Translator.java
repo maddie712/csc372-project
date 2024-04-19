@@ -24,6 +24,7 @@ public class Translator {
 		File inFile = new File(filename);
 		String newFilename = filename.split("\\.")[0].replace("\\", "").replace("/", "");
 		FileWriter outFile = new FileWriter(newFilename + ".java");
+		outFile.write("import java.util.Scanner;\n");
 		outFile.write("public class " + newFilename + "{\n");
 		///// TEMPORARY
 		outFile.write("\tpublic static void main(String[] args) {\n");

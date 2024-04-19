@@ -2,8 +2,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Input {
-    private Pattern intInput = Pattern.compile("^\\s*inputInt()\\s*$");
-	private Pattern stringInput = Pattern.compile("\\s*^inputStr()\\s*$");
+    private Pattern intInput = Pattern.compile("^\\s*inputInt\\(\\)\\s*$");
+	private Pattern stringInput = Pattern.compile("^\\s*inputStr\\(\\)\\s*$");
 
     public boolean match;
     public String result = "";
