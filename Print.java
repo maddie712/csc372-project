@@ -7,6 +7,7 @@ public class Print {
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private Pattern string = Pattern.compile("^\".*\"$");
+    private Pattern stringManip = Pattern.compile("^(.*)\\s*([+*])\\s*(.*)$");
 
     private Condition condition = new Condition();
     private MultDiv multDiv = new MultDiv();
@@ -38,27 +39,26 @@ public class Print {
             if (intValue(token.trim())) {
                 result += "<int>: " + token.trim() + "\n";
                 translated += token + ");";
-                return true;
             }
             else if (variable(token)) {
                 result += "<var>: " + token.trim() + "\n";
                 translated += token + ");";
-                return true;
             }
             else if (string(token)) {
                 result += "<string>: " + token.trim() + "\n";
                 translated += token + ");";
-                return true;
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
                 translated += multDiv.translated + ");";
-                return true;
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
                 translated += condition.translated + ");";
-                return true;
+            }
+            else if (stringManip(cmd)) {
+                result += "<string_manip: " + token.trim() + "\n";
+                translated += token + ");";
             }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
@@ -70,6 +70,7 @@ public class Print {
             translated = "";
             return false;
         }
+        return match;
     }
 
     private boolean println(String cmd) {
@@ -102,6 +103,10 @@ public class Print {
                 result += condition.result;
                 translated += condition.translated + ");";
             }
+            else if (stringManip(cmd)) {
+                result += "<string_manip: " + token.trim() + "\n";
+                translated += token + ");";
+            }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
                 translated = "";
@@ -127,6 +132,11 @@ public class Print {
 
     private boolean string(String cmd) {
         Matcher m = string.matcher(cmd);
+        return m.find();
+    }
+
+    private boolean stringManip(String cmd) {
+        Matcher m = stringManip.matcher(cmd);
         return m.find();
     }
 }

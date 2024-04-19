@@ -4,17 +4,17 @@ m = inputInt()
 
 i = a
 loop(i <= b){
-	print("*" * i) 
+	displayLine("*" * i) 
 	i = i + 1
 }
 
 sum = 0
 i = 1
 loop(i < m) {
-	if (i%a == 0 or i%b = 0) {
+	if (i%a == 0 or i%b == 0) {
 		sum = sum + i
 	}
 	i = i + 1
 }
 
-print(sum)
+displayLine(sum)
