@@ -36,9 +36,9 @@ public class Translator {
 				if (line.equals("")) { continue; }
 				if (line.contains("loop(")) {
 					String loopBlock = buildBlock(line, reader);
-					ForLoops loop = new ForLoops();
+					ForLoops loop = new ForLoops(varTypes, funcs);
 					if (loop.parseCmd(loopBlock)) {
-						System.out.println(loop.result);
+						System.out.println(loop.translated);
 						outFile.write(loop.translated + "\n");
 					}
 					else {

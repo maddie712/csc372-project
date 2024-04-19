@@ -1,17 +1,29 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ForLoops {
     private String loopRegex = "\\s*loop\\(([^,{}]+)(?:,([^{}]+))?\\)\\s*\\{(.+)\\}\\s*";
     private Pattern loopPattern = Pattern.compile(loopRegex, Pattern.DOTALL);
+    private Pattern intVal = Pattern.compile("^\\d+$");
+	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private MultDiv multDiv1 = new MultDiv();
     private MultDiv multDiv2 = new MultDiv();
     private Condition condition = new Condition();
-    private Line line = new Line();
+    private Line line = null;
     
     public boolean match;
     public String result = "";
     public String translated = "";
+
+    public ForLoops() {
+        line = new Line();
+    }
+
+    public ForLoops(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        line = new Line(varTypes, funcs);
+    }
+
 
     public boolean parseCmd(String cmd) {
         match = translateLoop(cmd);
@@ -37,6 +49,8 @@ public class ForLoops {
                     return false;
                 }
             } else {
+                Matcher v = var.matcher(firstExpression);
+                Matcher i = intVal.matcher(firstExpression);
                 if (condition.parseCmd(firstExpression)) {
                     result += "<loop>: loop(" + firstExpression + ") {";
                     result += condition.result;
@@ -46,6 +60,16 @@ public class ForLoops {
                     result += "<loop>: loop(" + firstExpression + ") {";
                     result += condition.result;
                     translated += "for (int i=0; i<" + multDiv1.translated + "; i++) {\n";
+                }
+                else if (v.find()) {
+                    result += "<loop>: loop(" + firstExpression + ") {";
+                    result += "<var>: " + firstExpression;
+                    translated += "while (" + firstExpression + ") {\n";
+                }
+                else if (i.find()) {
+                    result += "<loop>: loop(" + firstExpression + ") {";
+                    result += "<int>: " + firstExpression;
+                    translated += "for (int i=0; i<" + firstExpression + "; i++) {\n";
                 }
                 else {
                     result = "Failed to parse: { " + input.trim() + " } " + "is not a recognized loop definition.\n";
@@ -61,11 +85,12 @@ public class ForLoops {
                     result = line.result;
                     return false;
                 }
+                result += line.result;
+                translated += line.translated;
             }
 
             result += "<block>: \n";
-            result += line.result;
-            translated += line.translated + "}\n";
+            translated +="}\n";
             return true;
         } else {
             System.out.println("Failed to parse: {" + input + "} is not a valid loop expression.");

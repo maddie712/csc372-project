@@ -21,7 +21,7 @@ public class MultDiv {
         boolean match = m.find();
         if (match) {
             result += "<arithmetic_expr>: " + cmd + "\n";
-            String[] tokens = cmd.split("(?=[+\\-*/])|(?<=[+\\-*/])");
+            String[] tokens = cmd.split("(?=[+\\-*/%])|(?<=[+\\-*/%])");
             if (tokens.length < 3) {
                 result += "Failed to parse: { " + cmd.trim() + " } " + "is missing an operand.";
                 translated = "";
