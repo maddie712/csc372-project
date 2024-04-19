@@ -119,11 +119,11 @@ public class Translator {
 
 		// while in func (stack not empty)
 		while(reader.hasNext() && inFunc) {
-			line = reader.nextLine().strip();  // strip() so will remove all tabs/whitespace/indent at front of str
+			line = reader.nextLine().trim();  // strip() so will remove all tabs/whitespace/indent at front of str
 
 			// handles final func return
 			if(fn.parseReturn(line)) {
-				if(reader.nextLine().strip().equals("}")) {
+				if(reader.nextLine().trim().equals("}")) {
 					inFunc = false;  // exits func if 
 					fn.result += fn.retResult;
 					fn.translated += fn.translateReturn();
@@ -184,7 +184,7 @@ public class Translator {
 			result += loopBlock.result;
 			translated += loopBlock.translated;
 			while(reader.hasNextLine() && inLoop) {
-				line = reader.nextLine().strip();
+				line = reader.nextLine().trim();
 
 				if(fn.parseReturn(line)) {
 					result += fn.retResult;
@@ -238,7 +238,7 @@ public class Translator {
 			result += condBlock.result;
 			translated += condBlock.translated;
 			while(reader.hasNextLine() && inExpr) {
-				line = reader.nextLine().strip();
+				line = reader.nextLine().trim();
 
 				if(fn.parseReturn(line)) {
 					result += fn.retResult;
