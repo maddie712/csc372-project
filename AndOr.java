@@ -33,7 +33,6 @@ public class AndOr {
 
     public boolean parseCmd(String cmd) {
     	match = notExpr(cmd);
-    	System.out.print(result);
         return match;
     }
 
