@@ -115,6 +115,7 @@ public class VarAssign {
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
+		Input in = new Input();
 
 		// checks for func call assignment
         if (fnCall.parseCmd(cmd)){
@@ -150,6 +151,12 @@ public class VarAssign {
 			val = cmd;
 			result += "<string>: " + cmd + "\n";
 		}
+		// checks for user input assignment
+		else if (in.parseCmd(cmd)) {
+			type = in.result.contains("Str") ? "String" : "int";
+			val = in.translated;
+			result += "<input>: " + cmd + "\n";
+		}
 		// checks for variable assignment and checks var is initialised
 		else if (var.matcher(cmd).find() && varTypes.get(cmd)!=null) {
 			if(varTypes.get(cmd).equals("undef")) {
@@ -164,7 +171,6 @@ public class VarAssign {
 			result = "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
 			return false;
 		}
-        // still need to check Input?
 
 		translated += " = " + val + ";\n";
 

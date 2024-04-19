@@ -1,0 +1,5 @@
+x = inputInt()
+displayLine(x)
+
+y = inputStr()
+displayLine(y)
