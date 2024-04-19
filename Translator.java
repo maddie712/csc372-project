@@ -71,7 +71,7 @@ public class Translator {
 					}
 				}
 				else {
-					Line lineParser = new Line();
+					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
 						outFile.write("\t\t" + lineParser.translated + "\n");
@@ -146,7 +146,7 @@ public class Translator {
 				fn.translated += helpRet[1];
 			}
 			else {
-				Line lineParser = new Line();
+				Line lineParser = new Line(varTypes,funcs);
 				boolean match = lineParser.parseCmd(line);
 				System.out.println(lineParser.result);
 				if (match) {
@@ -200,7 +200,7 @@ public class Translator {
 					translated += helpRet[1];
 				}
 				else {
-					Line lineParser = new Line();
+					Line lineParser = new Line(varTypes,funcs);
 					if (lineParser.parseCmd(line)) {
 						result += lineParser.result;
 						translated += lineParser.translated;
@@ -254,7 +254,7 @@ public class Translator {
 					translated += helpRet[1];
 				}
 				else {
-					Line lineParser = new Line();
+					Line lineParser = new Line(varTypes,funcs);
 					if (lineParser.parseCmd(line)) {
 						result += lineParser.result;
 						translated += lineParser.translated;
