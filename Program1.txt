@@ -27,10 +27,16 @@ gcd = nonmax
 
 lcm = first * second / gcd
 
-print("Output:")
-print("Max = " + max)
-print("Sum = " + sum)
-print("Difference = " + difference)
-print("Product = " + product)
-print("GCD = " + gcd)
-print("LCM = " + lcm)
+displayLine("Output:")
+display("Max = ")
+displayLine(max)
+display("Sum = ")
+displayLine(sum)
+display("Difference = ")
+displayLine(difference)
+display("Product = ")
+displayLine(product)
+display("GCD = ")
+displayLine(gcd)
+display("LCM = ")
+displayLine(lcm)

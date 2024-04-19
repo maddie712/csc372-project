@@ -25,9 +25,9 @@ public class Translator {
 		String newFilename = filename.split("\\.")[0].replace("\\", "").replace("/", "");
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("import java.util.Scanner;\n");
-		outFile.write("public class " + newFilename + "{\n");
+		outFile.write("public class " + newFilename + " {\n");
 		///// TEMPORARY
-		outFile.write("\tpublic static void main(String[] args) {\n");
+		outFile.write("public static void main(String[] args) {\n");
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -39,7 +39,7 @@ public class Translator {
 					ForLoops loop = new ForLoops(varTypes, funcs);
 					if (loop.parseCmd(loopBlock)) {
 						System.out.println(loop.translated);
-						outFile.write(loop.translated + "\n");
+						outFile.write(loop.translated);
 					}
 					else {
 						System.out.println(loop.result);
@@ -51,7 +51,7 @@ public class Translator {
 					CondExpr condExpr = new CondExpr(varTypes,funcs);
 					if (condExpr.parseCmd(ifElseBlock)) {
 						System.out.println(condExpr.translated);
-						outFile.write(condExpr.translated + "\n");
+						outFile.write(condExpr.translated);
 					}
 					else {
 						System.out.println(condExpr.result);
@@ -63,7 +63,7 @@ public class Translator {
 
 					if (funcHelper(line, reader, fn)) {
 						System.out.println(fn.translated);
-						outFile.write(fn.translated + "\n");
+						outFile.write(fn.translated);
 					}
 					else {
 						System.out.println(fn.result);
@@ -75,15 +75,16 @@ public class Translator {
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
 						System.out.println(lineParser.translated);
-						outFile.write("\t\t" + lineParser.translated + "\n");
+						outFile.write(lineParser.translated);
 					}
 					else {
+						System.out.println(lineParser.result);
 						System.exit(0);
 					}
 				}
 			}
 			////// TEMPORARY
-			outFile.write("\t}\n");
+			outFile.write("}\n");
 			outFile.write("}\n");
 			reader.close();
 			outFile.close();

@@ -64,7 +64,7 @@ public class ForLoops {
                 else if (v.find()) {
                     result += "<loop>: loop(" + firstExpression + ") {";
                     result += "<var>: " + firstExpression;
-                    translated += "while (" + firstExpression + ") {\n";
+                    translated += "while (" + firstExpression + "!= 0) {\n";
                 }
                 else if (i.find()) {
                     result += "<loop>: loop(" + firstExpression + ") {";

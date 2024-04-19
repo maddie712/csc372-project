@@ -21,6 +21,7 @@ public class Print {
             translated = "System.out.print";
             match = println(cmd);
         }
+        translated += "\n";
         return match;
     }
 
