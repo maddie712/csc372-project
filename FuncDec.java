@@ -10,7 +10,8 @@ public class FuncDec {
     // Class Variables
     public boolean match;
     public String result;
-    public boolean inFunc;
+    public String retResult;
+    public String translated;
 
     private FuncInfo fn= null;
     private String retVal= null;
@@ -30,7 +31,6 @@ public class FuncDec {
     public FuncDec(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
         this.varTypes = varTypes;
         this.funcs = funcs;
-        inFunc = false;
     }
 
 
@@ -62,8 +62,9 @@ public class FuncDec {
     public boolean parseReturn(String cmd) {
         Matcher m = return_ln.matcher(cmd);
         boolean match = false;
+        retResult = "";
         if(m.find()) {
-            result += "<return>: " + cmd + "\n";
+            retResult += "<return>: " + cmd + "\n";
             retVal = m.group(1).trim();
             String retType = getType(retVal);
             match = (retType!=null);
@@ -72,9 +73,9 @@ public class FuncDec {
             }
             else {
                 fn.type = retType;
-                result += "<type>: " + retType + "\n";
             }
         }
+
         return match;
     }
 
@@ -109,15 +110,17 @@ public class FuncDec {
      */
     public boolean endFunc() {
         boolean match = true;
-        inFunc = false;
+        String headerStr = "";
 
         // if never returns, makes a void function; can be changed to be invalid to match grammar
         if(fn.type==null) {
             fn.type = "void";
         }
+        headerStr += fn.type + " " + fn.name + " (";
+        String paramStr = "";
 
         for(String param:fn.params) {
-            // checks all parameters were assigned values
+            // checks all params were assigned values
             if(fn.paramTypes.get(param).equals("undef")) {
                 if(varTypes.containsKey(param)) {
                     fn.paramTypes.put(param, varTypes.get(param)); // should prob error check this
@@ -127,6 +130,12 @@ public class FuncDec {
                     match = false;
                 }
             }
+            
+            // adds param translation
+            if(!paramStr.equals("")) {
+                paramStr += ", ";
+            }
+            paramStr += fn.paramTypes.get(param) + " " + param;
 
             // removes params from vars and restores old vals if needed
             if(fn.oldVars.containsKey(param)) {
@@ -137,6 +146,8 @@ public class FuncDec {
             }
         }
 
+        headerStr += paramStr + ") {\n";
+        translated = headerStr + translated;
         return match;
     }
 
@@ -213,31 +224,31 @@ public class FuncDec {
         }
         // checks for a func call value (null if func dne or is this func)
         else if (fnCall.parseCmd(cmd)){
-            result += "<func_call>: " + cmd + "\n";
+            retResult += "<func_call>: " + cmd + "\n";
 			return funcs.get(cmd).type;
 		}
         // checks for int return value
         else if(md.parseCmd(cmd) || intVal.matcher(cmd).find()){
-            result += "<mult_div>: " + cmd + "\n";
+            retResult += "<mult_div>: " + cmd + "\n";
 			return "int";
         }
         // checks for boolean return value
         else if(cond.parseCmd(cmd) || bool.matcher(cmd).find()){
-            result += "<condition>: " + cmd + "\n";
+            retResult += "<condition>: " + cmd + "\n";
 			return "boolean";
         }
         // checks for string return value
         else if(string.matcher(cmd).find()) {
-            result += "<string>: " + cmd + "\n";
+            retResult += "<string>: " + cmd + "\n";
 			return "String";
         }
         // checks for a variable value (null if variable not declared)
         else if(var.matcher(cmd).find()) {
-            result += "<var>: " + cmd + "\n";
+            retResult += "<var>: " + cmd + "\n";
 			return varTypes.get(cmd);
         }
         else {
-            result = "Failed to parse '" + cmd + "'. Invalid value to return.";
+            retResult = "Failed to parse '" + cmd + "'. Invalid value to return.";
         }
 
         return null;
