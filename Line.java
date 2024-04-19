@@ -39,7 +39,7 @@ public class Line {
         }
         else if (varAssign.parseCmd(cmd)) {
             result = varAssign.result;
-            translated = varAssign.translate();
+            translated = varAssign.translated;
             return true;
         }
         else {

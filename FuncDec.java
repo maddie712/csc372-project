@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,7 +8,7 @@ import java.util.regex.Pattern;
  * A function written in our language, translated line-by-line to Java.
  */
 public class FuncDec {
-    // Class Variables
+    // Public Variables
     public boolean match;
     public String result;
     public String retResult;
@@ -15,18 +16,21 @@ public class FuncDec {
     public String retTranslated;
     public String name;
 
+    // Private Variables
     private FuncInfo fn= null;
     private String retVal= null;
     private HashMap<String,String> varTypes= null;
     private HashMap<String,FuncInfo> funcs= null;
 
+    // Patterns
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
-    private Pattern func_dec = Pattern.compile("^func (.+)\\s*\\((.*)\\)\\s*\\{$");
-	private Pattern return_ln = Pattern.compile("^return( .+)*$");
+    private Pattern func_dec = Pattern.compile("^\\s*func (.+)\\s*\\((.*)\\)\\s*\\{\\s*$");
+	private Pattern return_ln = Pattern.compile("^\\s*return( .+)*\\s*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern bool = Pattern.compile("^true$|^false$");
     private Pattern string = Pattern.compile("^\"[^\"]*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+    private ArrayList<String> illegalNames = new ArrayList<String>(List.of("loop","if","input","inputInt","display","displayLine","not", "main"));
 
 
     // Constructor
@@ -43,8 +47,8 @@ public class FuncDec {
      */
     public boolean parseCmd(String cmd) {
         match = false;
-        result = "";
-        translated = "";
+        result = "";  
+        translated = "";  // must return blank if no match for cur Translator
         fn = null;
         name = null;
         Matcher m = func_dec.matcher(cmd);
@@ -81,28 +85,13 @@ public class FuncDec {
                 fn.type = retType;
             }
             if(match && retTranslated.equals("")) {
-                    retTranslated = "return " + retVal + ";\n";
-                }
+                retTranslated = "return " + retVal + ";\n";
+            }
         }
 
         return match;
     }
 
-    /*
-     * Translates the header of a function into java syntax.
-     * Assumes parseCmd() was successful and function has been fully parsed.
-     */
-    public String translateHeader() {
-        String paramStr = "";
-        for(String param:fn.params) {
-            if(!paramStr.equals("")) {
-                paramStr += ", ";
-            }
-            paramStr += fn.paramTypes.get(param) + " " + param;
-        }
-
-        return fn.type + " " + name + "(" + String.join(", ",fn.params) + ") {\n";
-    }
 
     /*
      * Translates a return line into java syntax.
@@ -175,7 +164,10 @@ public class FuncDec {
     private boolean parseName(String cmd) {
         Matcher m = func_name.matcher(cmd);
         if(m.find()) {
-            if(!funcs.containsKey(cmd)) { 
+            if(illegalNames.contains(cmd)) {
+                result = "Failed to parse: '" + cmd + "'. Is illegal function name.";
+            }
+            else if(!funcs.containsKey(cmd)) { 
                 result += "<func>: " + cmd + "\n";
                 return true;
             }

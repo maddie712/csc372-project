@@ -3,16 +3,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FuncCall {
-    // Class Variables
+    // Public Variables
     public boolean match;
     public String result;
     public String translated;
     public FuncInfo func= null;
 
+    // Private Variables
     private String args= null;
     private HashMap<String,String> varTypes= null;
 	private HashMap<String,FuncInfo> funcs= null;
     
+    // Patterns
     private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
     private Pattern func_call = Pattern.compile("^(.+)\\s*\\((.*)\\)\\s*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
@@ -42,6 +44,9 @@ public class FuncCall {
             String name = m.group(1).trim();
             match = parseName(name);
             match = match && parseArgs(m.group(2).trim());
+        }
+        else {
+            result = "Failed to parse '" + cmd + "'. Invalid func_call expression.";
         }
 
         return match;

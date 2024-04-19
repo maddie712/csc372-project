@@ -20,11 +20,11 @@ public class Input {
 
         if (integer.find()) {
             result += "<inputInt>: inputInt()";
-            translated += "Int();";
+            translated += "Int()";
         }
         else if (str.find()) {
             result += "<inputStr>: inputStr()";
-            translated += "Line();";
+            translated += "Line()";
         }
         else {
             result = "Failed to parse: { " + cmd.trim() + " } " + "is not a recognized input getter.\n";

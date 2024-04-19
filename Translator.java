@@ -8,12 +8,16 @@ import java.util.Scanner;
 import java.util.Stack;
 
 public class Translator {
-	ArrayList<String> intVars = new ArrayList<>();
-	ArrayList<String> stringVars = new ArrayList<>();
-	ArrayList<String> boolVars = new ArrayList<>();
+	//ArrayList<String> intVars = new ArrayList<>();
+	//ArrayList<String> stringVars = new ArrayList<>();
+	//ArrayList<String> boolVars = new ArrayList<>();
 
-	static HashMap<String,String> varTypes = new HashMap<>();
-	static HashMap<String,FuncInfo> funcs = new HashMap<>();
+	private static HashMap<String,String> varTypes = null;
+	private static HashMap<String,FuncInfo> funcs = null;
+	private static FuncDec func = null;
+	private static ForLoops loop = null;
+	private static CondExpr condExpr = null;
+	private static Line lineParser = null;
 
 	public static void main(String[] args) throws IOException {
 		Scanner in = new Scanner(System.in);
@@ -31,21 +35,31 @@ public class Translator {
 		try {
 			reader = new Scanner(inFile);
 
-			// func decs should all be at the top of the file so parse for first
-			FuncDec fn = new FuncDec(varTypes, funcs);
-			parseFuncs(reader, fn, outFile);
+			varTypes = new HashMap<>();
+			funcs = new HashMap<>();
+			func = new FuncDec(varTypes,funcs);
+			loop = new ForLoops(varTypes,funcs);
+			condExpr = new CondExpr(varTypes,funcs);
+			lineParser = new Line(varTypes,funcs);
+			boolean readFuncs = true;
 			
-			///// TEMPORARY
-			outFile.write("public static void main(String[] args) {\n");
+
 
 			while (reader.hasNextLine()) {
-				String line = reader.nextLine().trim();
+				String line;
+				if (readFuncs) {  // parses all funcs from top of file first
+					line = parseFuncs(reader, outFile);
+					readFuncs = false;
+					///// TEMPORARY
+					outFile.write("public static void main(String[] args) {\n");
+				}
+				else {
+					line = reader.nextLine().trim();
+				}
 
-
-				if (line.equals("")) { continue; }
+				if (line.isBlank()) { continue; }
 				if (line.contains("loop(")) {
 					String loopBlock = buildBlock(line, reader);
-					ForLoops loop = new ForLoops(varTypes, funcs);
 					if (loop.parseCmd(loopBlock)) {
 						System.out.println(loop.translated);
 						outFile.write(loop.translated);
@@ -57,7 +71,6 @@ public class Translator {
 				}
 				else if (line.contains("if ")) {
 					String ifElseBlock = buildBlock(line, reader);
-					CondExpr condExpr = new CondExpr(varTypes,funcs);
 					if (condExpr.parseCmd(ifElseBlock)) {
 						System.out.println(condExpr.translated);
 						outFile.write(condExpr.translated);
@@ -67,12 +80,11 @@ public class Translator {
 						System.exit(0);
 					}
 				}
-				else if (fn.parseCmd(line)) {
+				else if (func.parseCmd(line)) {
 					System.out.println("Failed to parse '" + line + "'. Functions must be initialised before rest of code.");
 					System.exit(0);
 				}
 				else {
-					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
 						System.out.println(lineParser.translated);
@@ -121,36 +133,47 @@ public class Translator {
 
 	/*
 	 * Handles parsing through all funcs (if any) declared at top of file input.
+	 * 
+	 * Returns the first line outside of functions in the file
 	 */
-	public static void parseFuncs(Scanner reader, FuncDec fn, FileWriter outFile) throws IOException{
+	public static String parseFuncs(Scanner reader, FileWriter outFile) throws IOException {
 		while (reader.hasNextLine()) {
 			String line = reader.nextLine().trim();
-			if(fn.parseCmd(line)) {
+			if(line.isBlank()) { continue; }
+
+			if(func.parseCmd(line)) {
 				// reads through the func that starts on the current line
-				if (funcHelper(line, reader, fn)) {
-					System.out.println(fn.translated);
-					outFile.write(fn.translated);
+				if (funcHelper(line, reader)) {
+					System.out.println(func.translated);
+					outFile.write(func.translated);
 				}
-				// returns when stops receiving funcs (no more at top of file)
-				else if (fn.result.isEmpty()) {
-					return;
-				}
-				// exits if there is an error in the current func
 				else {
-					System.out.println(fn.result);
+					System.out.println(func.result);
 					System.exit(0);
 				}
 			}
+			// returns when stops receiving funcs (no more at top of file)
+			else if (func.result.isEmpty()) {
+				System.out.println("Failed to parse '" + line + "'. Invalid func_dec expression.");
+				return line;
+			}
+			// exits if there is an error in the current func
+			else {
+				System.out.println(func.result);
+				System.exit(0);
+			}
 		}
+
+		return "";  // if no lines left in file
 	}
 
 	/*
 	 * Handles parsing through a function.
 	 */
-	public static boolean funcHelper(String line, Scanner reader, FuncDec fn) {
+	public static boolean funcHelper(String line, Scanner reader) {
 		// parse header to validate
-		if(!fn.parseCmd(line)) {
-			System.out.println(fn.result);
+		if(!func.parseCmd(line)) {
+			System.out.println(func.result);
 			System.exit(0);
 		}
 		boolean inFunc = true;
@@ -159,36 +182,40 @@ public class Translator {
 		while(reader.hasNext() && inFunc) {
 			line = reader.nextLine().trim();  // strip() so will remove all tabs/whitespace/indent at front of str
 
+			if(line.isBlank()) { continue; }
+
 			// handles final func return
-			if(fn.parseReturn(line)) {
-				if(reader.nextLine().trim().equals("}")) {
-					inFunc = false;  // exits func if 
-					fn.result += fn.retResult;
-					fn.translated += fn.translateReturn();
+			if(func.parseReturn(line)) {
+				if(reader.nextLine().strip().equals("}")) {
+					inFunc = false;
+					func.result += func.retResult;
+					func.translated += func.translateReturn();
 				}
 				else {
 					// need to find a way to get func name for error msg
-					fn.result=("Failed to parse '" + fn.name + "'. Must have '}' on line after final function return.");
+					func.result=("Failed to parse '" + func.name + "'. Must have '}' on line after final function return.");
 					return false;
 				}
 			}
-			else if (line.startsWith("loop")) {
-				String[] helpRet = loopHelper(line, reader, fn);
-				fn.result += helpRet[0];
-				fn.translated += helpRet[1];
+			// parses & translates any loops in the func
+			else if (loop.parseCmd(line)) {
+				String[] helpRet = loopHelper(line,reader);
+				func.result += helpRet[0];
+				func.translated += helpRet[1];
 			}
-			else if (line.startsWith("if")) {
-				String[] helpRet = condExprHelper(line, reader, fn);
-				fn.result += helpRet[0];
-				fn.translated += helpRet[1];
+			// parses & translates any if stmts in the func
+			else if (condExpr.parseCmd(line)) {
+				String[] helpRet = condExprHelper(line,reader);
+				func.result += helpRet[0];
+				func.translated += helpRet[1];
 			}
+			// parses & translates any line's in the func
 			else {
-				Line lineParser = new Line(varTypes,funcs);
 				boolean match = lineParser.parseCmd(line);
-				fn.result += lineParser.result;
+				func.result += lineParser.result;
 				if (match) {
-					fn.result += lineParser.result;
-					fn.translated += lineParser.translated;
+					func.result += lineParser.result;
+					func.translated += lineParser.translated;
 				}
 				else {
 					System.exit(0);
@@ -198,12 +225,13 @@ public class Translator {
 
 		// handles if file ends before func closed
 		if(inFunc) {
-			System.out.println("Failed to parse '" + fn.name + "'. Function must be closed with '}'.");
+			System.out.println("Failed to parse '" + func.name + "'. Function must be closed with '}'.");
 			return false;
 		}
 
-		if(fn.endFunc()) {
-			fn.addToFuncs();
+		// makes sure func was complete before saving
+		if(func.endFunc()) {
+			func.addToFuncs();
 			return true;
 		}
 		else {
@@ -214,115 +242,97 @@ public class Translator {
 	/*
 	 * Handles parsing through a loop in a function body.
 	 */
-	public static String[] loopHelper(String line, Scanner reader, FuncDec fn) {
-		//boolean inFunc = fn!=null;
-		ForLoops loopBlock = new ForLoops();
+	public static String[] loopHelper(String line, Scanner reader) {
+		//boolean inFunc = func!=null;
 		String result = "";
 		String translated = "";
 		boolean inLoop = true;
+		String firstLine = line;
 
-		if(loopBlock.parseCmd(line)) {
-			result += loopBlock.result;
-			translated += loopBlock.translated;
-			while(reader.hasNextLine() && inLoop) {
-				line = reader.nextLine().trim();
+		result += loop.result;
+		translated += loop.translated;
+		while(reader.hasNextLine() && inLoop) {
+			line = reader.nextLine().trim();
 
-				if(fn.parseReturn(line)) {
-					result += fn.retResult;
-					translated += fn.translateReturn();
-				}
-				else if (line.startsWith("loop(")) {
-					String[] helpRet = loopHelper(line, reader, fn);
-					result += helpRet[0];
-					translated += helpRet[1];
-				}
-				else if (line.startsWith("if(")) {
-					String[] helpRet = condExprHelper(line, reader, fn);
-					result += helpRet[0];
-					translated += helpRet[1];
+			if(func.parseReturn(line)) {
+				result += func.retResult;
+				translated += func.translateReturn();
+			}
+			else if (loop.parseCmd(line)) {
+				String[] helpRet = loopHelper(line, reader);
+				result += helpRet[0];
+				translated += helpRet[1];
+			}
+			else if (condExpr.parseCmd(line)) {
+				String[] helpRet = condExprHelper(line, reader);
+				result += helpRet[0];
+				translated += helpRet[1];
+			}
+			else {
+				if (lineParser.parseCmd(line)) {
+					result += lineParser.result;
+					translated += lineParser.translated;
 				}
 				else {
-					Line lineParser = new Line(varTypes,funcs);
-					if (lineParser.parseCmd(line)) {
-						result += lineParser.result;
-						translated += lineParser.translated;
-					}
-					else {
-						System.exit(0);
-					}
+					System.exit(0);
 				}
 			}
-
-			if(inLoop) {
-				System.out.println("Failed to parse loop '" + "*fn name*" + "'. Loop must be closed with '}'.");
-			}
-
-		}
-		else {
-			System.out.println(loopBlock.result);
-			System.exit(0);
 		}
 
-		String[] ret = {result, translated+"\n"};
+		if(inLoop) {
+			System.out.println("Failed to parse '" + firstLine + "'. Loop must be closed with '}'.");
+		}
 		
+		String[] ret = {result, translated+"\n"};
 		return ret;
 	} 
 
 	/*
 	 * Handles parsing through a cond expr in a function body.
 	 */
-	public static String[] condExprHelper(String line, Scanner reader, FuncDec fn) {
-		//boolean inFunc = fn!=null;
-		CondExpr condBlock = new CondExpr();
+	public static String[] condExprHelper(String line, Scanner reader) {
+		//boolean inFunc = func!=null;
 		String result = "";
 		String translated = "";
 		boolean inExpr = true;
+		String firstLine = line;
 
-		if(condBlock.parseCmd(line)) {
-			result += condBlock.result;
-			translated += condBlock.translated;
-			while(reader.hasNextLine() && inExpr) {
-				line = reader.nextLine().trim();
+		result += condExpr.result;
+		translated += condExpr.translated;
+		while(reader.hasNextLine() && inExpr) {
+			line = reader.nextLine().trim();
 
-				if(fn.parseReturn(line)) {
-					result += fn.retResult;
-					translated += fn.translateReturn();
-				}
-				else if (line.startsWith("loop(")) {
-					String[] helpRet = loopHelper(line, reader, fn);
-					result += helpRet[0];
-					translated += helpRet[1];
-				}
-				else if (line.startsWith("if(")) {
-					String[] helpRet = condExprHelper(line, reader, fn);
-					result += helpRet[0];
-					translated += helpRet[1];
-				}
-				else {
-					Line lineParser = new Line(varTypes,funcs);
-					if (lineParser.parseCmd(line)) {
-						result += lineParser.result;
-						translated += lineParser.translated;
-					}
-					else {
-						System.exit(0);
-					}
-				}
+			if(func.parseReturn(line)) {
+				result += func.retResult;
+				translated += func.translateReturn();
 			}
+			else if (loop.parseCmd(line)) {
+				String[] helpRet = loopHelper(line,reader);
+				result += helpRet[0];
+				translated += helpRet[1];
+			}
+			else if (condExpr.parseCmd(line)) {
+				String[] helpRet = condExprHelper(line,reader);
+				result += helpRet[0];
+				translated += helpRet[1];
+			}
+			else if (lineParser.parseCmd(line)) {
+				result += lineParser.result;
+				translated += lineParser.translated;
+			}
+			else {
+				System.exit(0);
+			}
+		}
 
 			if(inExpr) {
-				System.out.println("Failed to parse loop '" + "*fn name*" + "'. Loop must be closed with '}'.");
+				System.out.println("Failed to parse loop '" + firstLine + "'. Loop must be closed with '}'.");
 			}
-
-		}
-		else {
-			System.out.println(condBlock.result);
-			System.exit(0);
-		}
 
 		String[] ret = {result, translated+"\n"};
 		
 		return ret;
 	}
+
 
 }
