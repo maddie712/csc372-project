@@ -34,11 +34,11 @@ public class FuncCall {
         args = "";
         if(m.find()) {
             result += "<func_call>: " + cmd + "\n";
-            String name = m.group(1).strip();
+            String name = m.group(1).trim();
             match = parseName(name);
             if(match && funcs.containsKey(name)) {
                 fn = funcs.get(name);
-                match = match && parseArgs(fn, m.group(2).strip());
+                match = match && parseArgs(fn, m.group(2).trim());
             }
             else if(match) {
                 result += "Failed to parse: '" + name + "'. Function does not exist.\n";

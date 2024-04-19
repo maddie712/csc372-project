@@ -6,7 +6,7 @@ public class Print {
     private Pattern println = Pattern.compile("^(displayLine\\().*\\)$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private Pattern string = Pattern.compile("^\"\\w*\"$");
+    private Pattern string = Pattern.compile("^\".*\"$");
 
     private Condition condition = new Condition();
     private MultDiv multDiv = new MultDiv();
@@ -37,22 +37,27 @@ public class Print {
             if (intValue(token.trim())) {
                 result += "<int>: " + token.trim() + "\n";
                 translated += token + ");";
+                return true;
             }
             else if (variable(token)) {
                 result += "<var>: " + token.trim() + "\n";
                 translated += token + ");";
+                return true;
             }
             else if (string(token)) {
                 result += "<string>: " + token.trim() + "\n";
                 translated += token + ");";
+                return true;
             }
             else if (multDiv.parseCmd(token)) {
                 result += multDiv.result;
                 translated += token + ");";
+                return true;
             }
             else if (condition.parseCmd(token)) {
                 result += condition.result;
                 translated += token + ");";
+                return true;
             }
             else {
                 result = "Failed to parse: { " + token.trim() + " } " + "is not a recognized printable value.\n";
@@ -64,7 +69,6 @@ public class Print {
             translated = "";
             return false;
         }
-        return match;
     }
 
     private boolean println(String cmd) {
@@ -103,7 +107,7 @@ public class Print {
                 return false;
             }
         } else {
-            result = "Failed to parse: {" + cmd + "} is not a valid print expression.\n";
+            result = "Failed to parse: {" + cmd + "} is not a valid print line expression.\n";
             translated = "";
             return false;
         }
@@ -112,19 +116,16 @@ public class Print {
 
     private boolean intValue(String cmd) {
         Matcher m = intVal.matcher(cmd);
-        boolean match = m.find();
-        return match;
+        return m.find();
     }
 
     private boolean variable(String cmd) {
         Matcher m = var.matcher(cmd);
-        boolean match = m.find();
-        return match;
+        return m.find();
     }
 
     private boolean string(String cmd) {
         Matcher m = string.matcher(cmd);
-        boolean match = m.find();
-        return match;
+        return m.find();
     }
 }

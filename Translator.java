@@ -24,6 +24,7 @@ public class Translator {
 			reader = new Scanner(inFile);
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine().trim();
+				if (line.equals("")) { continue; }
 				if (line.contains("loop")) {
 					String loopBlock = buildBlock(line, reader);
 					ForLoops loop = new ForLoops();

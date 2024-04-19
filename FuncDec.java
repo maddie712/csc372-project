@@ -45,10 +45,10 @@ public class FuncDec {
         if(m.find()) {
             result += "<func_dec>: " + cmd + "\n";
             fn = new FuncInfo();
-            fn.name = m.group(1).strip();
+            fn.name = m.group(1).trim();
             match = true;
             match = match && parseName(fn.name);
-            match = match && parseParams(fn, m.group(2).strip());
+            match = match && parseParams(fn, m.group(2).trim());
         }
         
         return match;
@@ -62,7 +62,7 @@ public class FuncDec {
         boolean match = false;
         if(m.find()) {
             result += "<return>: " + cmd + "\n";
-            retVal = m.group(1).strip();
+            retVal = m.group(1).trim();
             String retType = getType(retVal);
             match = (retType!=null);
             if(fn.type!=null) {
@@ -176,7 +176,7 @@ public class FuncDec {
 
         String[] params = paramsStr.split(",");
         for(String param: params) {
-            param = param.strip();
+            param = param.trim();
             Matcher m = var.matcher(param);
             if(m.find()) {
                 if(varTypes.containsKey(param)) {
