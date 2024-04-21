@@ -2,16 +2,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Stack;
 
 public class Translator {
-	ArrayList<String> intVars = new ArrayList<>();
-	ArrayList<String> stringVars = new ArrayList<>();
-	ArrayList<String> boolVars = new ArrayList<>();
-
 	static HashMap<String,String> varTypes = new HashMap<>();
 	static HashMap<String,FuncInfo> funcs = new HashMap<>();
 
@@ -37,11 +32,12 @@ public class Translator {
 					String loopBlock = buildBlock(line, reader);
 					ForLoops loop = new ForLoops(varTypes, funcs);
 					if (loop.parseCmd(loopBlock)) {
-						System.out.println(loop.translated);
+						System.out.println(loop.result);
 						outFile.write(loop.translated);
 					}
 					else {
 						System.out.println(loop.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
@@ -49,11 +45,12 @@ public class Translator {
 					String ifElseBlock = buildBlock(line, reader);
 					CondExpr condExpr = new CondExpr(varTypes,funcs);
 					if (condExpr.parseCmd(ifElseBlock)) {
-						System.out.println(condExpr.translated);
+						System.out.println(condExpr.result);
 						outFile.write(condExpr.translated);
 					}
 					else {
 						System.out.println(condExpr.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
@@ -61,11 +58,12 @@ public class Translator {
 					FuncDec fn = new FuncDec(varTypes, funcs);
 
 					if (funcHelper(line, reader, fn)) {
-						System.out.println(fn.translated);
+						System.out.println(fn.result);
 						outFile.write(fn.translated);
 					}
 					else {
 						System.out.println(fn.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
@@ -77,11 +75,12 @@ public class Translator {
 					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
-						System.out.println(lineParser.translated);
+						System.out.println(lineParser.result);
 						outFile.write(lineParser.translated);
 					}
 					else {
 						System.out.println(lineParser.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}

@@ -7,129 +7,112 @@ public class VarAssign {
 	public String result;
 	public String translated;
 
-    private String varName= null;
-    private String type= null;
-    private String val= null;
-	private HashMap<String,String> varTypes= null;
-	private HashMap<String,FuncInfo> funcs= null;
+	private String varName = null;
+	private String type = null;
+	private String val = null;
+	private HashMap<String, String> varTypes = null;
+	private HashMap<String, FuncInfo> funcs = null;
 
-    private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
+	private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern bool = Pattern.compile("^true$|^false$");
 	private Pattern string = Pattern.compile("^\"[^\"]*\"$");
 
-
-	// Constructor
-	public VarAssign(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+	public VarAssign(HashMap<String, String> varTypes, HashMap<String, FuncInfo> funcs) {
 		this.varTypes = varTypes;
 		this.funcs = funcs;
 	}
 
-
-	// Public Methods
-
-	/* 
-	 * Parses a variable assignment line according to the grammar for 
-	 * <var_assign>. 
+	/*
+	 * Parses a variable assignment line according to the grammar for <var_assign>.
 	 */
-    public boolean parseCmd(String cmd) {
-		// resets current line info
+	public boolean parseCmd(String cmd) {
 		varName = "";
 		type = "";
 		val = "";
 		result = "";
 		translated = "";
-		
-        Matcher m = var_assign.matcher(cmd);
+
+		Matcher m = var_assign.matcher(cmd);
 		boolean match = false;
 		if (m.find()) {
 			result += "<var_assign>: " + cmd + "\n";
 			match = true;
-            match = match && parseVal(m.group(2).trim());
-            match = match && parseVar(m.group(1).trim());
-        }
+			match = match && parseVal(m.group(2).trim());
+			match = match && parseVar(m.group(1).trim());
+		}
 
-        return match;
-    }
+		return match;
+	}
 
 	/*
-	 * Translates the var assign line to java syntax.
-	 * Assumes parseCmd() was successful.
+	 * Translates the var assign line to java syntax. Assumes parseCmd() was
+	 * successful.
 	 */
 	public String translate() {
 		return translated;
 	}
 
-
-	// Private Methods
-
-	/* 
-	 * Parses the variable name of a variable assignment. If a variable of that
-	 * name already exists, performs type-checking to ensure the new value 
-	 * is the same type.
+	/*
+	 * Parses the variable name of a variable assignment. If a variable of that name
+	 * already exists, performs type-checking to ensure the new value is the same
+	 * type.
 	 */
-    private boolean parseVar(String cmd) {
+	private boolean parseVar(String cmd) {
 		Matcher m = var.matcher(cmd);
 		match = false;
-		if(m.find()) {
+		if (m.find()) {
 			match = true;
-			if(!varTypes.containsKey(cmd)) {
+			if (!varTypes.containsKey(cmd)) {
 				varName = cmd;
-				varTypes.put(varName,type);
+				varTypes.put(varName, type);
 				result += "<var>: " + varName;
 				translated = type + " " + varName + translated;
-			}
-			else if (varTypes.get(cmd).equals("undef")) {
+			} else if (varTypes.get(cmd).equals("undef")) {
 				varName = cmd;
-				varTypes.put(varName,type);
+				varTypes.put(varName, type);
 				result += "<var>: " + varName;
 				translated = varName + translated;
-			}
-			else if (varTypes.get(cmd).equals(type)) {
+			} else if (varTypes.get(cmd).equals(type)) {
 				varName = cmd;
 				result += "<var>: " + varName;
 				translated = varName + translated;
-        	}
+			}
 			// if var already exists but with different type assignment
 			else {
 				result = "Failed to parse '" + cmd + "'. Mismatch type assign.\n";
 				match = false;
 			}
-    	}
-		else {
+		} else {
 			result = "Failed to parse '" + cmd + "'. Invalid variable name.\n";
 		}
 
-        return match;
-    }
+		return match;
+	}
 
-	/* 
-	 * Parses the value being assigned to a variable. Valid assignments fall 
-	 * under <mult_div>, <condition>, <string>, and <var>.
-	 * 
-	 * Currently doesn't work for non-<mult_div> assignments because of how
-	 * MultDiv.java is written and the same would be true for Condition.java.
+	/*
+	 * Parses the value being assigned to a variable. Valid assignments fall under
+	 * <mult_div>, <condition>, <string>, and <var>.
 	 */
-    private boolean parseVal(String cmd) {
-		FuncCall fnCall = new FuncCall(varTypes,funcs);
+	private boolean parseVal(String cmd) {
+		FuncCall fnCall = new FuncCall(varTypes, funcs);
 		MultDiv md = new MultDiv();
 		Condition cond = new Condition();
 		Input in = new Input();
 
 		// checks for func call assignment
-        if (fnCall.parseCmd(cmd)){
+		if (fnCall.parseCmd(cmd)) {
 			type = fnCall.func.type;
 			val = fnCall.translated;
 			result += "<func_call>: " + cmd + "\n";
 		}
 		// checks for int assignment
-		else if (md.parseCmd(cmd)) { 
+		else if (md.parseCmd(cmd)) {
 			type = "int";
 			val = md.translated;
 			result += "<mult_div>: " + cmd + "\n";
-		}
-		else if (intVal.matcher(cmd).find()) { 
+		} else if (intVal.matcher(cmd).find()) {
 			type = "int";
 			val = cmd;
 			result += "<int>: " + cmd + "\n";
@@ -139,8 +122,7 @@ public class VarAssign {
 			type = "boolean";
 			val = cond.translated;
 			result += "<condition>: " + cmd + "\n";
-		}
-		else if (bool.matcher(cmd).find()) {
+		} else if (bool.matcher(cmd).find()) {
 			type = "boolean";
 			val = cmd;
 			result += "<bool>: " + cmd + "\n";
@@ -158,22 +140,21 @@ public class VarAssign {
 			result += "<input>: " + cmd + "\n";
 		}
 		// checks for variable assignment and checks var is initialised
-		else if (var.matcher(cmd).find() && varTypes.get(cmd)!=null) {
-			if(varTypes.get(cmd).equals("undef")) {
+		else if (var.matcher(cmd).find() && varTypes.get(cmd) != null) {
+			if (varTypes.get(cmd).equals("undef")) {
 				result = "Failed to parse '" + cmd + "'. Need to initialise parameter before using.";
 				return false;
 			}
 			type = varTypes.get(cmd);
 			val = cmd;
 			result += "<var>: " + cmd + "\n";
-		}
-		else {
+		} else {
 			result = "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
 			return false;
 		}
 
 		translated += " = " + val + ";\n";
 
-        return true;
-    }
+		return true;
+	}
 }
