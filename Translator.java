@@ -26,8 +26,7 @@ public class Translator {
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("import java.util.Scanner;\n");
 		outFile.write("public class " + newFilename + " {\n");
-		///// TEMPORARY
-		outFile.write("public static void main(String[] args) {\n");
+		int check = 0;
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -71,6 +70,10 @@ public class Translator {
 					}
 				}
 				else {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
 					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
@@ -83,8 +86,9 @@ public class Translator {
 					}
 				}
 			}
-			////// TEMPORARY
-			outFile.write("}\n");
+			if (check >= 1) {
+				outFile.write("}\n");
+			}
 			outFile.write("}\n");
 			reader.close();
 			outFile.close();
