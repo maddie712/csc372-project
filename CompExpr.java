@@ -14,6 +14,8 @@ public class CompExpr {
     public String translated = "";
 
     public boolean parseCmd(String cmd) {
+        result = "";
+        translated = "";
         match = comparisonExpr(cmd);
         return match;
     }

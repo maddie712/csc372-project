@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,8 @@ public class ForLoops {
     private MultDiv multDiv2 = new MultDiv();
     private Condition condition = new Condition();
     private Line line = null;
+    private HashMap<String,String> varTypes;
+    private HashMap<String,FuncInfo> funcs;
     
     public boolean match;
     public String result = "";
@@ -21,6 +24,8 @@ public class ForLoops {
     }
 
     public ForLoops(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        this.varTypes = varTypes;
+        this.funcs = funcs;
         line = new Line(varTypes, funcs);
     }
 
@@ -38,10 +43,19 @@ public class ForLoops {
             String block = matcher.group(3).trim();
 
             if (secondExpression != null) {
+                Matcher v1 = var.matcher(firstExpression);
+                Matcher v2 = var.matcher(secondExpression);
+                Matcher i1 = intVal.matcher(firstExpression);
+                Matcher i2 = intVal.matcher(secondExpression);
                 if (multDiv1.parseCmd(firstExpression) && multDiv2.parseCmd(secondExpression)) {
                     result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {";
                     result += multDiv1.result + multDiv2.result;
                     translated += "for (int i=" + multDiv1.translated + "; i<" + multDiv2.translated + "; i++) {\n";
+                }
+                else if ((v1.find() && v2.find()) || (v1.find() && i2.find()) || (i1.find() && v2.find()) || (i1.find() && i2.find())) {
+                    result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {";
+                    result += "<loop_val>: " + firstExpression + "\n<loop_val>: " + secondExpression;
+                    translated += "for (int i_=" + firstExpression + "; i_<" + secondExpression + "; i_++) {\n";
                 }
                 else {
                     result = "Failed to parse: { " + input.trim() + " } " + "is not a recognized loop definition.\n";
@@ -80,23 +94,77 @@ public class ForLoops {
 
             result += "<block>: ";
             String[] lines = block.split("\n");
-            for (String l : lines) {
-                line.parseCmd(l);
-                if (!line.match) {
-                    result = line.result;
-                    return false;
+            int i=0;
+            while (i < lines.length) {
+                if (lines[i].contains("loop(")) {
+					int loopBlocklen = findBlock(i+1, lines);
+                    String loopBlock = buildBlock(i, loopBlocklen, lines);
+					ForLoops loop = new ForLoops(varTypes, funcs);
+					if (loop.parseCmd(loopBlock)) {
+                        result += loop.result;
+                        translated += loop.translated;
+					}
+                    i = loopBlocklen + 1;
+				}
+				else if (lines[i].contains("if ")) {
+					int ifElseBlocklen = findBlock(i+1, lines);
+                    String ifElseBlock = buildBlock(i, ifElseBlocklen, lines);
+					CondExpr condExpr = new CondExpr(varTypes,funcs);
+					if (condExpr.parseCmd(ifElseBlock)) {
+                        result += condExpr.result;
+                        translated += condExpr.translated;
+					}
+                    i = ifElseBlocklen + 1;
+				}
+                else {
+                    line.parseCmd(lines[i]);
+                    if (!line.match) {
+                        result = line.result;
+                        return false;
+                    }
+                    result += line.result;
+                    translated += line.translated;
+                    i += 1;
                 }
-                result += line.result;
-                translated += line.translated;
             }
 
             result += "\n";
             translated +="}\n";
             return true;
         } else {
-            System.out.println("Failed to parse: {" + input + "} is not a valid loop expression.");
+            result = "Failed to parse: {" + input + "} is not a valid loop expression.";
             return false;
         }
+    }
+
+    public int findBlock(int index, String[] in) {
+		Stack<String> stack = new Stack<>();
+		stack.push("{");
+
+		while (!stack.empty()) {
+			String cur = in[index];
+			if (cur.contains("{")) {
+				stack.push("{");
+			}
+			if (cur.contains("}")) {
+				stack.pop();
+			}
+            index += 1;
+
+			if (cur.contains("}") && index+1 < in.length && in[index+1].contains("else")) {
+				index += findBlock(index, in);
+			}
+		}
+		return index-1;
+	}
+
+    public String buildBlock(int start, int end, String[] list) {
+        result = "";
+        for (int i=start; i<= end; i++) {
+            result += list[i];
+        }
+
+        return result;
     }
 
 }

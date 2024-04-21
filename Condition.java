@@ -19,14 +19,15 @@ public class Condition {
         
         boolean comparison = comp.parseCmd(token);
         boolean andOrBool = andOr.parseCmd(token);
-        if (comparison) {
-            result += comp.result;
-            translated += comp.translated;
-            match = true;
-        }
-        else if (andOrBool) {
+        if (andOrBool) {
             result += andOr.result;
             translated += andOr.translated;
+            System.out.println("translated andOr: " + andOr.translated);
+            match = true;
+        }
+        else if (comparison) {
+            result += comp.result;
+            translated += comp.translated;
             match = true;
         }
         else {

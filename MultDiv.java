@@ -12,6 +12,8 @@ public class MultDiv {
     public String translated = "";
 
     public boolean parseCmd(String cmd) {
+        result = "";
+        translated = "";
         match = arithmeticExpr(cmd);
         return match;
     }
