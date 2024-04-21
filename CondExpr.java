@@ -48,6 +48,7 @@ public class CondExpr {
                 return false;
             }
 
+            result += "<block>: \n";
             String[] lines1 = ifBlock.split("\n");
             for (String l : lines1) {
                 line1.parseCmd(l);
@@ -55,13 +56,13 @@ public class CondExpr {
                     result = line1.result;
                     return false;
                 }
+                result += line1.result;
+                translated += line1.translated;
             }
 
-            result += "<block>: \n";
-            result += line1.result;
-            translated += line1.translated + "}\nelse {\n";
+            translated += "}\nelse {\n";
 
-            result += "<else>: } else {\n";
+            result += "<else>: } else {\n<block>: \n";
 
             String[] lines2 = elseBlock.split("\n");
             for (String l : lines2) {
@@ -70,11 +71,11 @@ public class CondExpr {
                     result = line2.result;
                     return false;
                 }
+                result += line2.result;
+                translated += line2.translated;
             }
 
-            result += "<block>: \n";
-            result += line2.result;
-            translated += line2.translated + "}\n";
+            translated += "}\n";
             return true;
         } else if (ifMatcher.matches()) {
             String condition = ifMatcher.group(1).trim();

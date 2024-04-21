@@ -110,11 +110,10 @@ public class Translator {
 
 			result += cur + "\n";
 
-			if (in.hasNext("\\s*else\\s*.*")) {
+			if (cur.contains("}") && in.hasNext("\\s*else\\s*.*")) {
 				result += buildBlock(in.nextLine(), in);
 			}
 		}
-
 		return result;
 	}
 

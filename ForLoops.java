@@ -78,6 +78,7 @@ public class ForLoops {
                 }
             }
 
+            result += "<block>: ";
             String[] lines = block.split("\n");
             for (String l : lines) {
                 line.parseCmd(l);
@@ -89,7 +90,7 @@ public class ForLoops {
                 translated += line.translated;
             }
 
-            result += "<block>: \n";
+            result += "\n";
             translated +="}\n";
             return true;
         } else {
