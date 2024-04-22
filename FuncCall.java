@@ -64,10 +64,10 @@ public class FuncCall {
 				translated += cmd;
 				return true;
 			} else {
-				result += "Failed to parse: '" + cmd + "'. Function does not exist.\n";
+				result = "Failed to parse: '" + cmd + "'. Function does not exist.\n";
 			}
 		} else {
-			result += "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+			result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
 		}
 		return false;
 	}

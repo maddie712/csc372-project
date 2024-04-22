@@ -11,7 +11,7 @@ public class Input {
 
 	public boolean parseCmd(String cmd) {
         result = "";
-        translated = "";
+        translated = "new Scanner(System.in).next";
 		match = input(cmd);
 		return match;
 	}
