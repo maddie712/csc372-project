@@ -1,0 +1,20 @@
+loop(3) {
+    displayLine("hi")
+}
+
+loop(0,5) {
+    displayLine("wow")
+}
+
+x = 0
+loop(x < 4) {
+    displayLine(x)
+    x = x + 1
+}
+
+loop(10) {
+    loop(10) {
+        display("*")
+    }
+    displayLine("")
+}

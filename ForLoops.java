@@ -14,6 +14,8 @@ public class ForLoops {
 	private Line line = null;
 	private HashMap<String, String> varTypes;
 	private HashMap<String, FuncInfo> funcs;
+	private String[] vars = {"_a","_b","_c","_d","_e","_f","_g","_h","_i","_j","_k","_l","_m"};
+	private static int curVar = 0;
 
 	public boolean match;
 	public String result = "";
@@ -42,21 +44,24 @@ public class ForLoops {
 			String firstExpression = matcher.group(1).trim();
 			String secondExpression = matcher.group(2) != null ? matcher.group(2).trim() : null;
 			String block = matcher.group(3).trim();
+			String c = vars[curVar];
+			curVar++;
 
 			if (secondExpression != null) {
 				Matcher v1 = var.matcher(firstExpression);
 				Matcher v2 = var.matcher(secondExpression);
 				Matcher i1 = intVal.matcher(firstExpression);
 				Matcher i2 = intVal.matcher(secondExpression);
+				boolean first = v1.find() || i1.find();
+				boolean second = v2.find() || i2.find();
 				if (multDiv1.parseCmd(firstExpression) && multDiv2.parseCmd(secondExpression)) {
-					result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {";
+					result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {\n";
 					result += multDiv1.result + multDiv2.result;
-					translated += "for (int i=" + multDiv1.translated + "; i<" + multDiv2.translated + "; i++) {\n";
-				} else if ((v1.find() && v2.find()) || (v1.find() && i2.find()) || (i1.find() && v2.find())
-						|| (i1.find() && i2.find())) {
-					result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {";
-					result += "<loop_val>: " + firstExpression + "\n<loop_val>: " + secondExpression;
-					translated += "for (int i_=" + firstExpression + "; i_<" + secondExpression + "; i_++) {\n";
+					translated += "for (int " + c + "=" + multDiv1.translated + "; " + c + "<" + multDiv2.translated + "; " + c + "++) {\n";
+				} else if (first && second) {
+					result += "<loop>: loop(" + firstExpression + ", " + secondExpression + ") {\n";
+					result += "<loop_val>: " + firstExpression + "\n<loop_val>: " + secondExpression + "\n";
+					translated += "for (int " + c + "=" + firstExpression + "; " + c + "<" + secondExpression + "; " + c + "++) {\n";
 				} else {
 					result = "Failed to parse: { " + input.trim() + " } " + "is not a recognized loop definition.\n";
 					translated = "";
@@ -66,21 +71,21 @@ public class ForLoops {
 				Matcher v = var.matcher(firstExpression);
 				Matcher i = intVal.matcher(firstExpression);
 				if (condition.parseCmd(firstExpression)) {
-					result += "<loop>: loop(" + firstExpression + ") {";
+					result += "<loop>: loop(" + firstExpression + ") {\n";
 					result += condition.result;
 					translated += "while (" + condition.translated + ") {\n";
 				} else if (multDiv1.parseCmd(firstExpression)) {
-					result += "<loop>: loop(" + firstExpression + ") {";
+					result += "<loop>: loop(" + firstExpression + ") {\n";
 					result += condition.result;
-					translated += "for (int i=0; i<" + multDiv1.translated + "; i++) {\n";
+					translated += "for (int " + c + "=0; " + c + "<" + multDiv1.translated + "; " + c + "++) {\n";
 				} else if (v.find()) {
-					result += "<loop>: loop(" + firstExpression + ") {";
-					result += "<var>: " + firstExpression;
+					result += "<loop>: loop(" + firstExpression + ") {\n";
+					result += "<var>: " + firstExpression + "\n";
 					translated += "while (" + firstExpression + "!= 0) {\n";
 				} else if (i.find()) {
-					result += "<loop>: loop(" + firstExpression + ") {";
-					result += "<int>: " + firstExpression;
-					translated += "for (int i=0; i<" + firstExpression + "; i++) {\n";
+					result += "<loop>: loop(" + firstExpression + ") {\n";
+					result += "<int>: " + firstExpression + "\n";
+					translated += "for (int " + c + "=0; " + c + "<" + firstExpression + "; " + c + "++) {\n";
 				} else {
 					result = "Failed to parse: { " + input.trim() + " } " + "is not a recognized loop definition.\n";
 					translated = "";
@@ -88,7 +93,7 @@ public class ForLoops {
 				}
 			}
 
-			result += "<block>: ";
+			result += "<block>: \n";
 			String[] lines = block.split("\n");
 			int i = 0;
 			while (i < lines.length) {
@@ -122,7 +127,7 @@ public class ForLoops {
 				}
 			}
 
-			result += "\n";
+			result += "}\n";
 			translated += "}\n";
 			return true;
 		} else {

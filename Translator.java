@@ -29,6 +29,10 @@ public class Translator {
 				String line = reader.nextLine().trim();
 				if (line.equals("")) { continue; }
 				if (line.contains("loop(")) {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
 					String loopBlock = buildBlock(line, reader);
 					ForLoops loop = new ForLoops(varTypes, funcs);
 					if (loop.parseCmd(loopBlock)) {
@@ -42,6 +46,10 @@ public class Translator {
 					}
 				}
 				else if (line.contains("if ")) {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
 					String ifElseBlock = buildBlock(line, reader);
 					CondExpr condExpr = new CondExpr(varTypes,funcs);
 					if (condExpr.parseCmd(ifElseBlock)) {
