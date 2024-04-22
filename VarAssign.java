@@ -104,13 +104,13 @@ public class VarAssign {
 		if (fnCall.parseCmd(cmd)) {
 			type = fnCall.func.type;
 			val = fnCall.translated;
-			result += "<func_call>: " + cmd + "\n";
+			result += "<func_call>: " + cmd + "\n" + fnCall.result;
 		}
 		// checks for int assignment
 		else if (md.parseCmd(cmd)) {
 			type = "int";
 			val = md.translated;
-			result += "<mult_div>: " + cmd + "\n";
+			result += "<mult_div>: " + cmd + "\n" + md.result;
 		} else if (intVal.matcher(cmd).find()) {
 			type = "int";
 			val = cmd;
@@ -120,7 +120,7 @@ public class VarAssign {
 		else if (cond.parseCmd(cmd)) {
 			type = "boolean";
 			val = cond.translated;
-			result += "<condition>: " + cmd + "\n";
+			result += "<condition>: " + cmd + "\n" + cond.result;
 		} else if (bool.matcher(cmd).find()) {
 			type = "boolean";
 			val = cmd;
@@ -136,7 +136,7 @@ public class VarAssign {
 		else if (in.parseCmd(cmd)) {
 			type = in.result.contains("Str") ? "String" : "int";
 			val = in.translated;
-			result += "<input>: " + cmd + "\n";
+			result += "<input>: " + cmd + "\n" + in.result;
 		}
 		// checks for variable assignment and checks var is initialised
 		else if (var.matcher(cmd).find() && varTypes.get(cmd) != null) {

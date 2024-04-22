@@ -1,1 +1,1 @@
-x = false o true
+x = true not
