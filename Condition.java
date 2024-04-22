@@ -26,7 +26,7 @@ public class Condition {
 			result += comp.result;
 			translated += comp.translated;
 		} else {
-			result = "Failed to parse: {" + cmd + "} is not a valid condition.\n";
+			result = "Failed to parse: { " + token + " } " + andOr.result + " AND " + comp.result + "\n";
 			return false;
 		}
 		return true;

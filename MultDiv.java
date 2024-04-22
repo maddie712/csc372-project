@@ -73,7 +73,7 @@ public class MultDiv {
 				return false;
 			}
 		} else {
-			result = "Failed to parse: {" + cmd + "} is not a valid arithmetic expression.\n";
+			result = "Failed to parse: { " + cmd + " } is not a valid arithmetic expression.\n";
 			translated = "";
 			return false;
 		}

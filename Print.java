@@ -62,7 +62,7 @@ public class Print {
 				return false;
 			}
 		} else {
-			result = "Failed to parse: {" + cmd + "} is not a valid print expression.\n";
+			result = "Failed to parse: { " + cmd + " } is not a valid print expression.\n";
 			translated = "";
 			return false;
 		}
@@ -103,7 +103,7 @@ public class Print {
 				return false;
 			}
 		} else {
-			result = "Failed to parse: {" + cmd + "} is not a valid print line expression.\n";
+			result = "Failed to parse: { " + cmd + " } is not a valid print line expression.\n";
 			translated = "";
 			return false;
 		}
