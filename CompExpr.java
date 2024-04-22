@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 public class CompExpr {
 	private Pattern comp = Pattern.compile("^([\\s\\S]+)\\s*((>=|<=|==|!=|<|>))\\s*([\\s\\S]+)$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
-	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+	private Pattern var = Pattern.compile("^(?!^true|false$)[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern op = Pattern.compile("^((>=|<=|==|!=|<|>))$");
 
 	private MultDiv multDiv = new MultDiv();

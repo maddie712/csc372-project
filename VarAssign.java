@@ -33,14 +33,13 @@ public class VarAssign {
 		val = "";
 		result = "";
 		translated = "";
-
 		Matcher m = var_assign.matcher(cmd);
 		boolean match = false;
 		if (m.find()) {
 			result += "<var_assign>: " + cmd + "\n";
 			match = true;
-			match = match && parseVal(m.group(2).trim());
-			match = match && parseVar(m.group(1).trim());
+			match = match && parseVal(cmd.substring(cmd.indexOf("=")+1, cmd.length()).trim());
+			match = match && parseVar(cmd.substring(0, cmd.indexOf("=")).trim());
 		}
 
 		return match;
@@ -67,16 +66,16 @@ public class VarAssign {
 			if (!varTypes.containsKey(cmd)) {
 				varName = cmd;
 				varTypes.put(varName, type);
-				result += "<var>: " + varName;
+				result += "<var>: " + varName + "\n";
 				translated = type + " " + varName + translated;
 			} else if (varTypes.get(cmd).equals("undef")) {
 				varName = cmd;
 				varTypes.put(varName, type);
-				result += "<var>: " + varName;
+				result += "<var>: " + varName + "\n";
 				translated = varName + translated;
 			} else if (varTypes.get(cmd).equals(type)) {
 				varName = cmd;
-				result += "<var>: " + varName;
+				result += "<var>: " + varName + "\n";
 				translated = varName + translated;
 			}
 			// if var already exists but with different type assignment
