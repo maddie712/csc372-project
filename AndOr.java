@@ -8,7 +8,7 @@ public class AndOr {
 
 	private CompExpr comp = new CompExpr();
 
-	Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+	Pattern var = Pattern.compile("^(?!^not|and|or$)[a-zA-Z][a-zA-z_0-9]*$");
 	Pattern andOr = Pattern.compile("^([\\s\\S]+)\\s*(and|or)\\s*([\\s\\S]+)$");
 	Pattern not = Pattern.compile("not\\s*(\\(.*\\)|[a-zA-Z][a-zA-Z_0-9]*)");
 	Pattern notLiteral = Pattern.compile("^not$");
@@ -37,14 +37,14 @@ public class AndOr {
 			int rightParen = 0;
 			for (String token : tokens) {
 				token = token.trim();
-				if (token.length() > 0 && token.substring(0, 1).equals("(")) {
+				if (token.length() > 0 && token.contains("(")) {
 					leftParen++;
 					token = token.replace("(", "");
 					result += "<paren>: (\n";
 					translated += "(";
 				}
 				boolean right = false;
-				if (token.length() > 0 && token.substring(token.length() - 1).equals(")")) {
+				if (token.length() > 0 && token.contains(")")) {
 					right = true;
 					rightParen++;
 					token = token.replace(")", "");
@@ -63,7 +63,7 @@ public class AndOr {
 					translated += comp.translated;
 				} else {
 					result = "Failed to parse: { " + token.trim() + " } "
-							+ "is not a recognized integer, variable, or arithmetic operator.\n";
+							+ "is not a recognized boolean, variable, or boolean operator.\n";
 					return false;
 				}
 
@@ -93,6 +93,7 @@ public class AndOr {
 			result += "<notLiteral>: not\n";
 
 			String token = cmd.replaceFirst("not", "").trim();
+			System.out.println("token: " + token);
 			int leftParen = 0;
 			int rightParen = 0;
 			if (token.length() > 0 && token.substring(0, 1).equals("(")) {

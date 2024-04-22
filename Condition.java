@@ -22,7 +22,6 @@ public class Condition {
 		if (andOrBool) {
 			result += andOr.result;
 			translated += andOr.translated;
-			System.out.println("translated andOr: " + andOr.translated);
 		} else if (comparison) {
 			result += comp.result;
 			translated += comp.translated;

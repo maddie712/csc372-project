@@ -149,7 +149,12 @@ public class VarAssign {
 			val = cmd;
 			result += "<var>: " + cmd + "\n";
 		} else {
-			result = "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
+			result = "";
+			result += fnCall.result;
+			result += md.result;
+			result += cond.result;
+			result += in.result;
+			result += "Failed to parse '" + cmd + "'. Invalid value to assign.\n";
 			return false;
 		}
 

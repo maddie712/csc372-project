@@ -12,4 +12,4 @@ e = not true
 f = not (true and false)
 g = not true and false
 h = not (false)
-i = true and (not false)
+i = true and not false

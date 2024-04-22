@@ -1,8 +1,0 @@
-x = 2
-displayLine(x)
-
-y = "hi"
-displayLine(y)
-
-z = false
-displayLine(z)
