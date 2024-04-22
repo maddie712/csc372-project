@@ -21,10 +21,10 @@ public class Input {
 		Matcher str = stringInput.matcher(cmd);
 
 		if (integer.find()) {
-			result += "<inputInt>: inputInt()";
+			result += "<inputInt>: inputInt()\n";
 			translated += "Int();";
 		} else if (str.find()) {
-			result += "<inputStr>: inputStr()";
+			result += "<inputStr>: inputStr()\n";
 			translated += "Line();";
 		} else {
 			result = "Failed to parse: { " + cmd.trim() + " } " + "is not a recognized input getter.\n";
