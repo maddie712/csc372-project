@@ -32,7 +32,7 @@ public class CompExpr {
 				tokens = cmd.split("(?<=(==|<|>))|(?=(==|<|>))");
 			}
 			if (tokens.length < 3) {
-				result = cmd.trim() + " is missing an operand.";
+				result = "'"+cmd.trim() + "' is missing an operand.";
 				return false;
 			}
 			int leftParen = 0;
@@ -65,7 +65,7 @@ public class CompExpr {
 					result += multDiv.result;
 					translated += multDiv.translated;
 				} else {
-					result = token.trim() + " is not a recognized integer, variable, or comparison operator.";
+					result = "'"+token.trim() + "' is not a recognized integer, variable, or comparison operator.";
 					translated = "";
 					return false;
 				}
@@ -76,12 +76,12 @@ public class CompExpr {
 				}
 			}
 			if (leftParen != rightParen) {
-				result = cmd + " is missing a \"(\" or \")\"";
+				result = "'"+cmd + "' is missing a \"(\" or \")\"";
 				translated = "";
 				return false;
 			}
 		} else {
-			result = cmd + " is not a valid comparison expression.";
+			result = "'"+cmd + "' is not a valid comparison expression.";
 			translated = "";
 			return false;
 		}

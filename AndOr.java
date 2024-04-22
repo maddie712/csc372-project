@@ -30,7 +30,7 @@ public class AndOr {
 			result += "<and_or>: " + cmd + "\n";
 			String[] tokens = cmd.split("(?=and|or)|(?<=and|or)");
 			if (tokens.length < 3) {
-				result = cmd.trim() + " is missing an operand.";
+				result = "'" + cmd.trim() + "' is missing an operand.";
 				return false;
 			}
 			int leftParen = 0;
@@ -62,7 +62,7 @@ public class AndOr {
 					result += comp.result;
 					translated += comp.translated;
 				} else {
-					result = token.trim() + " is not a recognized boolean, variable, or boolean operator.";
+					result = "'"+token.trim() + "' is not a recognized boolean, variable, or boolean operator.";
 					return false;
 				}
 
@@ -72,11 +72,11 @@ public class AndOr {
 				}
 			}
 			if (leftParen != rightParen) {
-				result = cmd + " is missing a \"(\" or \")\"";
+				result = "'"+cmd + "' is missing a \"(\" or \")\"";
 				return false;
 			}
 		} else {
-			result = cmd + " is not a valid and/or expression or subdivision.";
+			result = "'"+cmd + "' is not a valid and/or expression or subdivision.";
 			return false;
 		}
 
@@ -118,7 +118,7 @@ public class AndOr {
 				result += comp.result;
 				translated += comp.translated;
 			} else {
-				result = token.trim() + " is not a recognized boolean, variable, or boolean expression.";
+				result = "'"+token.trim() + "' is not a recognized boolean, variable, or boolean expression.";
 				return false;
 			}
 
@@ -128,14 +128,14 @@ public class AndOr {
 			}
 
 			if (leftParen != rightParen) {
-				result = cmd + " is missing a \"(\" or \")\"";
+				result = "'"+cmd + "' is missing a \"(\" or \")\"";
 				return false;
 			}
 		} else if (cmd.contains("and") || cmd.contains("or")) {
 			match = andOrExpr(cmd);
 		}
 		else {
-			result = cmd + " is not a valid and/or/not expression or subdivision.";
+			result = "'"+cmd + "' is not a valid and/or/not expression or subdivision.";
 			return false;
 		}
 		return match;
@@ -166,7 +166,7 @@ public class AndOr {
 			translated += cmd;
 		}
 		else
-			result = cmd + " is not a valid " + item + ".";
+			result = "'"+cmd + "' is not a valid " + item + ".";
 	}
 
 }
