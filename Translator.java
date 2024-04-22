@@ -106,26 +106,32 @@ public class Translator {
 
 
 	public static String buildBlock(String firstLine, Scanner in) {
-		String result = firstLine + "\n";
-		Stack<String> stack = new Stack<>();
-		stack.push("{");
+		try {
+			String result = firstLine + "\n";
+			Stack<String> stack = new Stack<>();
+			stack.push("{");
 
-		while (!stack.empty()) {
-			String cur = in.nextLine().trim();
-			if (cur.contains("{")) {
-				stack.push("{");
-			}
-			if (cur.contains("}")) {
-				stack.pop();
-			}
+			while (!stack.empty()) {
+				String cur = in.nextLine().trim();
+				if (cur.contains("{")) {
+					stack.push("{");
+				}
+				if (cur.contains("}")) {
+					stack.pop();
+				}
 
-			result += cur + "\n";
+				result += cur + "\n";
 
-			if (cur.contains("}") && in.hasNext("\\s*else\\s*.*")) {
-				result += buildBlock(in.nextLine(), in);
+				if (cur.contains("}") && in.hasNext("\\s*else\\s*.*")) {
+					result += buildBlock(in.nextLine(), in);
+				}
 			}
+			return result;
+		} catch (Exception e) {
+			System.out.println("Failed to parse: Program does not contain enough lines, or some important lines are missing");
+			System.exit(0);
 		}
-		return result;
+		return "";
 	}
 
 	public static boolean funcHelper(String line, Scanner reader, FuncDec fn) {

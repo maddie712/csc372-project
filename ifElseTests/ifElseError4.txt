@@ -1,0 +1,4 @@
+x = inputInt()
+
+if (x % 2 == 0)
+    displayLine("x is even")

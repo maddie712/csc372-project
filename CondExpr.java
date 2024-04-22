@@ -45,7 +45,9 @@ public class CondExpr {
 			if (input.contains("else")) {
 				input = input.split("else")[0];
 			}
-			String ifBlock = input.substring(input.indexOf("{")+1, input.lastIndexOf("}")).trim();
+			String ifBlock = "";
+			try { ifBlock = input.substring(input.indexOf("{")+1, input.lastIndexOf("}")).trim(); }
+			catch (Exception e) { System.out.println("Failed to parse: Program does not contain enough lines, or some important lines are missing"); System.exit(0);}
 
 			if (cond.parseCmd(condition)) {
 				result += "<if_dec>: if (" + condition + ") {\n";
