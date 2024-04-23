@@ -1,6 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +28,7 @@ public class FuncDec {
 	private Pattern bool = Pattern.compile("^true$|^false$");
     private Pattern string = Pattern.compile("^\"[^\"]*\"$");
     private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private ArrayList<String> illegalNames = new ArrayList<String>(List.of("loop","if","input","inputInt","display","displayLine","not", "main"));
+    private ArrayList<String> illegalNames = new ArrayList<String>(Arrays.asList("loop","if","input","inputInt","display","displayLine","not", "main"));
 
 	public FuncDec(HashMap<String, String> varTypes, HashMap<String, FuncInfo> funcs) {
 		this.varTypes = varTypes;

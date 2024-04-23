@@ -50,7 +50,7 @@ public class Translator {
 					line = reader.nextLine().trim();
 				}
 
-				if (line.isBlank()) { 
+				if (line.trim().equals("")) { 
 					outFile.write("\n"); 
 					continue;
 				}
@@ -141,7 +141,7 @@ public class Translator {
 	public static String parseFuncs(Scanner reader, FileWriter outFile) throws IOException {
 		while (reader.hasNextLine()) {
 			String line = reader.nextLine().trim();
-			if(line.isBlank()) { 
+			if(line.trim().equals("")) { 
 				outFile.write("\n"); 
 			}
 			else if(func.parseCmd(line)) {
@@ -185,12 +185,12 @@ public class Translator {
 		while(reader.hasNext() && inFunc) {
 			line = reader.nextLine().trim();
 
-			if(line.isBlank()) { 
+			if(line.trim().equals("")) { 
 				func.translated += "\n"; 
 			}
 			// handles final func return
 			else if(func.parseReturn(line)) {
-				if(reader.nextLine().strip().equals("}")) {
+				if(reader.nextLine().trim().equals("}")) {
 					inFunc = false;
 					func.result += func.retResult;
 					func.translated += func.retTranslated;
