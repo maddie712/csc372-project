@@ -25,7 +25,7 @@ public class Translator {
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("import java.util.Scanner;\n");
 		outFile.write("public class " + newFilename + " {\n");
-
+		int check = 0;
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -54,24 +54,34 @@ public class Translator {
 
 				if (line.isBlank()) { continue; }
 				if (line.contains("loop(")) {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
 					String loopBlock = buildBlock(line, reader);
 					if (loop.parseCmd(loopBlock)) {
-						System.out.println(loop.translated);
+						System.out.println(loop.result);
 						outFile.write(loop.translated);
 					}
 					else {
 						System.out.println(loop.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
 				else if (line.contains("if ")) {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
 					String ifElseBlock = buildBlock(line, reader);
 					if (condExpr.parseCmd(ifElseBlock)) {
-						System.out.println(condExpr.translated);
+						System.out.println(condExpr.result);
 						outFile.write(condExpr.translated);
 					}
 					else {
 						System.out.println(condExpr.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
@@ -80,19 +90,26 @@ public class Translator {
 					System.exit(0);
 				}
 				else {
+					check++;
+					if (check == 1) {
+						outFile.write("public static void main(String[] args) {\n");
+					}
+					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
-						System.out.println(lineParser.translated);
+						System.out.println(lineParser.result);
 						outFile.write(lineParser.translated);
 					}
 					else {
 						System.out.println(lineParser.result);
+						outFile.close();
 						System.exit(0);
 					}
 				}
 			}
-			////// TEMPORARY
-			outFile.write("}\n");
+			if (check >= 1) {
+				outFile.write("}\n");
+			}
 			outFile.write("}\n");
 			reader.close();
 			outFile.close();
@@ -103,27 +120,32 @@ public class Translator {
 
 
 	public static String buildBlock(String firstLine, Scanner in) {
-		String result = firstLine + "\n";
-		Stack<String> stack = new Stack<>();
-		stack.push("{");
+		try {
+			String result = firstLine + "\n";
+			Stack<String> stack = new Stack<>();
+			stack.push("{");
 
-		while (!stack.empty()) {
-			String cur = in.nextLine().trim();
-			if (cur.contains("{")) {
-				stack.push("{");
-			}
-			if (cur.contains("}")) {
-				stack.pop();
-			}
+			while (!stack.empty()) {
+				String cur = in.nextLine().trim();
+				if (cur.contains("{")) {
+					stack.push("{");
+				}
+				if (cur.contains("}")) {
+					stack.pop();
+				}
 
-			result += cur + "\n";
+				result += cur + "\n";
 
-			if (in.hasNext("\\s*else\\s*.*")) {
-				result += buildBlock(in.nextLine(), in);
+				if (cur.contains("}") && in.hasNext("\\s*else\\s*.*")) {
+					result += buildBlock(in.nextLine(), in);
+				}
 			}
+			return result;
+		} catch (Exception e) {
+			System.out.println("Failed to parse: Program does not contain enough lines, or some important lines are missing");
+			System.exit(0);
 		}
-
-		return result;
+		return "";
 	}
 
 	/*

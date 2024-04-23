@@ -1,0 +1,14 @@
+x = 10
+y = 5
+
+a = x + y
+b = x - y
+c = x * y
+d = x / y
+e = x % y
+
+f = (x + 2) - y
+g = (x * x) % y
+
+h = x + x + x + x
+i = (y+x) * (x-y)

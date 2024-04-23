@@ -13,34 +13,30 @@ public class Condition {
         andOr = new AndOr(varTypes);
     }
 
-    public boolean parseCmd(String cmd) {
-        match = condition(cmd);
-        return match;
-    }
+	public boolean parseCmd(String cmd) {
+        result = "";
+        translated = "";
+		match = condition(cmd);
+		return match;
+	}
 
-    private boolean condition(String cmd) {
-        result += "<condition>: " + cmd + "\n";
+	private boolean condition(String cmd) {
+		result += "<condition>: " + cmd + "\n";
 
-        boolean match = false;
-        String token = cmd.trim();
-        
-        boolean comparison = comp.parseCmd(token);
-        boolean andOrBool = andOr.parseCmd(token);
-        if (comparison) {
-            result += comp.result;
-            translated += comp.translated;
-            match = true;
-        }
-        else if (andOrBool) {
-            result += andOr.result;
-            translated += andOr.translated;
-            match = true;
-        }
-        else {
-            result = "Failed to parse: {" + cmd + "} is not a valid condition.\n";
-            return false;
-        }
-        return match;
-    }
+		String token = cmd.trim();
+		boolean comparison = comp.parseCmd(token);
+		boolean andOrBool = andOr.parseCmd(token);
+		if (andOrBool) {
+			result += andOr.result;
+			translated += andOr.translated;
+		} else if (comparison) {
+			result += comp.result;
+			translated += comp.translated;
+		} else {
+			result = "Failed to parse: { " + token + " } " + andOr.result + " AND " + comp.result + "\n";
+			return false;
+		}
+		return true;
+	}
 
 }

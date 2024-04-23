@@ -3,8 +3,11 @@ b = inputInt()
 m = inputInt()
 
 i = a
-loop(i <= b){
-	displayLine("*" * i) 
+loop(i <= b) {
+	loop(0,i) {
+		display("*")
+	}
+	displayLine("")
 	i = i + 1
 }
 

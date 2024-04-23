@@ -1,0 +1,10 @@
+n = inputInt()
+
+factorial = 1
+i = 2
+loop(i <= n) {
+    factorial = factorial * i
+    i = i + 1
+}
+
+displayLine("The factorial of " + n + " is " + factorial)

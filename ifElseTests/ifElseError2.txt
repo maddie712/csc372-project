@@ -1,0 +1,6 @@
+if () {
+    displayLine("hi")
+}
+else {
+    displayLine("hello")
+}

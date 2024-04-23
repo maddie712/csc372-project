@@ -16,10 +16,11 @@ else {
 }
 
 difference = max - nonmax
+m = max
 
-loop(max) {
-	temp = max
-	max = nonmax % max
+loop(m) {
+	temp = m
+	m = nonmax % m
 	nonmax = temp
 }
 

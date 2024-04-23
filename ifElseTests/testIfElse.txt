@@ -1,0 +1,30 @@
+x = inputInt()
+if (x >= 0) {
+    displayLine("The number you entered is positive or 0")
+}
+
+if (x < 0) {
+    displayLine("The number you entered is negative")
+}
+
+
+y = inputInt()
+if (y == 0) {
+    displayLine("Zero entered")
+}
+else {
+    displayLine("Nonzero entered")
+}
+
+
+z = inputInt()
+if (z % 2 == 0) {
+    if (z > 0) {
+        displayLine("number is even and positive")
+    }
+}
+else {
+    if (z > 0) {
+        displayLine("number is odd and positive")
+    }
+}

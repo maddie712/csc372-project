@@ -1,0 +1,12 @@
+x = inputInt()
+y = inputInt()
+
+if (x > y) {
+    display("X is greater than Y")
+}
+
+if (x < y) {
+    display("X is less than Y")
+} else {
+    display("X is not less than Y")
+}

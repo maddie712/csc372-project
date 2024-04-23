@@ -8,15 +8,10 @@ import java.util.HashMap;
  * those variables so can be restored after ending the function.
  */
 public class FuncInfo {
-    public String name= null;
-    public String type= null;
-    public ArrayList<String> params= null;
-    public HashMap<String,String> paramTypes= null;
-    public HashMap<String,String> oldVars= null;
+	public String name = null;
+	public String type = null;
+	public ArrayList<String> params = null;
+	public HashMap<String, String> paramTypes = null;
+	public HashMap<String, String> oldVars = null;
 
-    // Constructor
-    public FuncInfo() {
-        
-    }
-    
 }

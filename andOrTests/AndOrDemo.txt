@@ -1,0 +1,15 @@
+x = true
+y = false
+z = x and y
+
+a = true and false
+b = true or false
+c = (true and false)
+d = (true or false)
+
+e = not true
+
+f = not (true and false)
+g = not true and false
+h = not (false)
+i = true and not false

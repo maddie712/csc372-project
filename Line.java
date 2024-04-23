@@ -15,35 +15,32 @@ public class Line {
         print = new Print(varTypes);
     }
 
-    public boolean parseCmd(String cmd) {
-        result = "";
-        translated = "";
-        match = line(cmd);
-        return match;
-    }
+	public boolean parseCmd(String cmd) {
+		result = "";
+		translated = "";
+		match = line(cmd);
+		return match;
+	}
 
-    public boolean line(String cmd) {
-        if (print.parseCmd(cmd)) {
-            result = print.result;
-            translated = print.translated;
-            return true;
-        }
-        else if (funcCall.parseCmd(cmd)) {
-            result = funcCall.result;
-            translated = funcCall.translated + ";\n";
-            return true;
-        }
-        else if (varAssign.parseCmd(cmd)) {
-            result = varAssign.result;
-            translated = varAssign.translated;
-            return true;
-        }
-        else {
-            result += print.result;
-            result += funcCall.result;
-            result += varAssign.result;
-            return false;
-        }
-    }
+	public boolean line(String cmd) {
+		if (print.parseCmd(cmd)) {
+			result = print.result;
+			translated = print.translated;
+			return true;
+		} else if (funcCall.parseCmd(cmd)) {
+			result = funcCall.result;
+			translated = funcCall.translated + ";\n";
+			return true;
+		} else if (varAssign.parseCmd(cmd)) {
+			result = varAssign.result;
+			translated = varAssign.translated;
+			return true;
+		} else {
+			result += print.result;
+			result += funcCall.result;
+			result += varAssign.result;
+			return false;
+		}
+	}
 
 }
