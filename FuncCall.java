@@ -24,6 +24,7 @@ public class FuncCall {
 		this.funcs = funcs;
 	}
 
+
 	/*
 	 * Parses a function call in our language.
 	 */
@@ -40,17 +41,13 @@ public class FuncCall {
 			match = parseName(name);
 			match = match && parseArgs(m.group(2).trim());
 		}
+        else {
+            result = "Failed to parse '" + cmd + "'. Invalid func_call expression.\n";
+        }
 
 		return match;
 	}
-
-	/*
-	 * Translates the function call into java syntax. Does not add newline or ; to
-	 * end because can be inline
-	 */
-	public String translate() {
-		return func.name + "(" + args + ")";
-	}
+	
 
 	/*
 	 * Parses a function name by checking if it is a valid name.
@@ -90,7 +87,7 @@ public class FuncCall {
 				String param = func.params.get(i);
 				String argType = getType(argsArr[i]);
 				if (!(func.paramTypes.get(param).equals(argType))) {
-					result = "Failed to parse: { " + argsArr[i] + " } Invalid arg value.\n";
+					result = "Failed to parse: '" + argsArr[i] + "'. Not a " + argType + " value.\n";
 					return false;
 				}
 			}
@@ -100,19 +97,19 @@ public class FuncCall {
 			translated += "(" + args + ")";
 		}
 		else {
-			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments";
+			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments\n";
 			return false;
 		}
 
 		return match;
 	}
 
-	/*
-	 * Gets the type of an argument.
-	 */
-	private String getType(String arg) {
-		MultDiv md = new MultDiv();
-		Condition cond = new Condition();
+    /*
+     * Gets the type of an argument.
+     */
+    private String getType(String arg) {
+		MultDiv md = new MultDiv(varTypes);
+		Condition cond = new Condition(varTypes);
 
 		if (md.parseCmd(arg) || intVal.matcher(arg).find()) {
 			return "int";
@@ -123,7 +120,7 @@ public class FuncCall {
 		} else if (var.matcher(arg).find() && varTypes.containsKey(arg)) {
 			return varTypes.get(arg);
 		}
-		result = "Failed to parse: { " + arg + " } Invalid arg value.\n";
-		return "";
+
+		return ""; 
 	}
 }

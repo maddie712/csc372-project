@@ -41,6 +41,9 @@ public class VarAssign {
 			match = match && parseVal(cmd.substring(cmd.indexOf("=")+1, cmd.length()).trim());
 			match = match && parseVar(cmd.substring(0, cmd.indexOf("=")).trim());
 		}
+		else {
+			result += "Failed to parse: '" + cmd + "'. Invalid var_assign expression.\n";
+		}
 
 		return match;
 	}
@@ -58,10 +61,8 @@ public class VarAssign {
 	 * already exists, performs type-checking to ensure the new value is the same
 	 * type.
 	 */
-	private boolean parseVar(String cmd) {
-		Matcher m = var.matcher(cmd);
-		match = false;
-		if (m.find()) {
+    private boolean parseVar(String cmd) {
+		if(var.matcher(cmd).find()) {  // checks valid var name
 			match = true;
 			if (!varTypes.containsKey(cmd)) {
 				varName = cmd;
@@ -80,11 +81,11 @@ public class VarAssign {
 			}
 			// if var already exists but with different type assignment
 			else {
-				result = "Failed to parse: { " + cmd + " } Mismatch type assign.\n";
+				result = "Failed to parse: '" + cmd + "' is already initialized with a different type.\n";
 				match = false;
 			}
 		} else {
-			result = "Failed to parse: { " + cmd + " } Invalid variable name.\n";
+			result = "'" + cmd + "' is not a valid variable name.\n";
 		}
 
 		return match;
@@ -96,14 +97,16 @@ public class VarAssign {
 	 */
 	private boolean parseVal(String cmd) {
 		FuncCall fnCall = new FuncCall(varTypes, funcs);
-		MultDiv md = new MultDiv();
-		Condition cond = new Condition();
+		MultDiv md = new MultDiv(varTypes);
+		Condition cond = new Condition(varTypes);
 		Input in = new Input();
+		result += "<val>: " + cmd + "\n";  // val isn't a nt but I think makes parsing is clearer
 
 		// checks for func call assignment
 		if (fnCall.parseCmd(cmd)) {
 			type = fnCall.func.type;
 			val = fnCall.translated;
+			result += "<func_call>: " + cmd + "\n" + fnCall.result;
 			result += "<func_call>: " + cmd + "\n" + fnCall.result;
 		}
 		// checks for int assignment
@@ -137,11 +140,12 @@ public class VarAssign {
 			type = in.result.contains("Str") ? "String" : "int";
 			val = in.translated;
 			result += "<input>: " + cmd + "\n" + in.result;
+			result += "<input>: " + cmd + "\n" + in.result;
 		}
 		// checks for variable assignment and checks var is initialised
 		else if (var.matcher(cmd).find() && varTypes.get(cmd) != null) {
 			if (varTypes.get(cmd).equals("undef")) {
-				result = "Failed to parse: { " + cmd + " } Need to initialise parameter before using.\n";
+				result = "Need to initialise parameter '" + cmd + "' before using.\n";
 				return false;
 			}
 			type = varTypes.get(cmd);
@@ -153,7 +157,7 @@ public class VarAssign {
 			result += md.result;
 			result += cond.result;
 			result += in.result;
-			result += "Failed to parse: { " + cmd + " } Invalid value to assign.\n";
+			result += "'" + cmd + "is not a valid value to assign.\n";
 			return false;
 		}
 

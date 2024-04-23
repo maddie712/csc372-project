@@ -1,0 +1,38 @@
+func loopTest1() {
+    x = 5
+    y = 0
+    loop(0,5) {
+        y = y + 1
+    }
+
+    return y
+}
+
+func loopTest2(x) {
+    x = x + 1
+    y = 0
+    loop(x) {
+        y = y + 1
+    }
+    
+    return "success"
+}
+
+func loopTest3(a,b,c) {
+    if (a < b) {
+        displayLine("a")
+    }
+    else { 
+        if (a < c) {
+            displayLine("b")
+        }
+    }
+    return
+}
+
+x = 1
+y = 2
+
+loopTest1()
+loopTest2(5)
+loopTest3(x,y,3)

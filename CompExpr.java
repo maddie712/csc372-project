@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,11 +8,17 @@ public class CompExpr {
 	private Pattern var = Pattern.compile("^(?!^true|false$)[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern op = Pattern.compile("^((>=|<=|==|!=|<|>))$");
 
-	private MultDiv multDiv = new MultDiv();
+	private MultDiv multDiv = null;
+    private HashMap<String,String> varTypes = null;
 
 	public boolean match;
 	public String result = "";
 	public String translated = "";
+
+    public CompExpr(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+        multDiv = new MultDiv(varTypes);
+    }
 
 	public boolean parseCmd(String cmd) {
 		result = "";
@@ -56,6 +63,8 @@ public class CompExpr {
 					result += "<int>: " + token.trim() + "\n";
 					translated += token;
 				} else if (variable(token)) {
+                    if (!typeCheck(token))
+                        return false;
 					result += "<var>: " + token.trim() + "\n";
 					translated += token;
 				} else if (operator(token)) {
@@ -105,4 +114,28 @@ public class CompExpr {
 		boolean match = m.find();
 		return match;
 	}
+
+    /*
+     * Checks that any variables used are initialised to int values.
+     * 
+     * If booleans/and_or is added will need to be updated.
+     */
+    private boolean typeCheck(String cmd) {
+        String type = varTypes.get(cmd);
+        if (type==null) {
+            result = "'" + cmd + "' is not an initialized integer variable.\n";
+            return false;
+        }
+        else if (type.equals("int")) {
+			return true;
+		}
+		else if (type.equals("undef")) {
+			varTypes.put(cmd,"int");
+			return true;
+		}
+		else {
+            result = "'" + cmd + "' is not an initialized integer variable.\n";
+            return false;
+        }
+    }
 }

@@ -1,0 +1,21 @@
+func foo() {
+    return 5
+}
+
+x = 15
+y= x/5
+z = x * y
+
+a = true
+b= a and false
+c = a or b
+
+str1 = "hello world"
+str2 = "123"
+str3 = ""
+
+z = x
+d = a
+str5 = str1
+
+foo = foo()

@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -6,7 +7,8 @@ public class AndOr {
 	public String result = "";
 	public String translated = "";
 
-	private CompExpr comp = new CompExpr();
+	private CompExpr comp;
+    private HashMap<String,String> varTypes = null;
 
 	Pattern var = Pattern.compile("^(?!^not|and|or$)[a-zA-Z][a-zA-z_0-9]*$");
 	Pattern andOr = Pattern.compile("^([\\s\\S]+)\\s*(and|or)\\s*([\\s\\S]+)$");
@@ -14,6 +16,11 @@ public class AndOr {
 	Pattern notLiteral = Pattern.compile("^not$");
 	Pattern bool = Pattern.compile("^true$|^false$");
 	Pattern andOrLiteral = Pattern.compile("^and$|^or$");
+
+    public AndOr(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+		comp = new CompExpr(varTypes);
+    }
 
 	public boolean parseCmd(String cmd) {
         result = "";
@@ -57,6 +64,8 @@ public class AndOr {
 				} else if (bool(token)) {
 					printMsg(match, "<bool>", token.trim(), "boolean");
 				} else if (variable(token)) {
+                    if (!typeCheck(token)) 
+                        return false;
 					printMsg(match, "<var>", token.trim(), "variable");
 				} else if (comp.parseCmd(token)) {
 					result += comp.result;
@@ -111,7 +120,10 @@ public class AndOr {
 			if (bool(token)) {
 				printMsg(match, "<bool>", token.trim(), "boolean");
 			} else if (variable(token)) {
-				printMsg(match, "<var>", token.trim(), "variable");
+                if (typeCheck(token)) 
+    				printMsg(match, "<var>", token.trim(), "variable");
+                else 
+                    return false;
 			} else if (token.contains("and") || token.contains("or")) {
 				andOrExpr(token);
 			} else if (comp.parseCmd(token)) {
@@ -168,5 +180,27 @@ public class AndOr {
 		else
 			result = "'"+cmd + "' is not a valid " + item + ".";
 	}
+
+    /*
+     * Checks that any variables used are initialised to boolean values.
+     */
+    private boolean typeCheck(String cmd) {
+        String type = varTypes.get(cmd);
+        if (type==null) {
+            result = "'" + cmd + "' is not an initialized boolean variable.\n";
+            return false;
+        }
+        else if (type.equals("boolean")) {
+			return true;
+		}
+		else if (type.equals("undef")) {
+			varTypes.put(cmd,"boolean");
+			return true;
+		}
+        else {
+            result = "'" + cmd + "' is not an initialized boolean variable.\n";
+            return false;
+        }
+    }
 
 }

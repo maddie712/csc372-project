@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -9,11 +10,18 @@ public class Print {
 	private Pattern string = Pattern.compile("^\".*\"$");
 	private Pattern stringManip = Pattern.compile("^(.*)\\s*([+*])\\s*(.*)$");
 
-	private Condition condition = new Condition();
-	private MultDiv multDiv = new MultDiv();
-	public boolean match;
-	public String result = "";
-	public String translated = "System.out.print";
+    private Condition condition = null;
+    private MultDiv multDiv = null;
+    private HashMap<String,String> varTypes;
+    public boolean match;
+    public String result = "";
+    public String translated = "System.out.print";
+
+    public Print(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+        condition = new Condition(varTypes);
+        multDiv = new MultDiv(varTypes);
+    }
 
 	public boolean parseCmd(String cmd) {
         result = "";
@@ -42,6 +50,8 @@ public class Print {
 				result += "<int>: " + token.trim() + "\n";
 				translated += token + ");";
 			} else if (variable(token)) {
+                if (!varCheck(token)) 
+                    return false;
 				result += "<var>: " + token.trim() + "\n";
 				translated += token + ");";
 			} else if (string(token)) {
@@ -83,6 +93,8 @@ public class Print {
 				result += "<int>: " + token.trim() + "\n";
 				translated += token + ");";
 			} else if (variable(token)) {
+                if(!varCheck(token)) 
+                    return false;
 				result += "<var>: " + token.trim() + "\n";
 				translated += token + ");";
 			} else if (string(token)) {
@@ -125,8 +137,23 @@ public class Print {
 		return m.find();
 	}
 
-	private boolean stringManip(String cmd) {
-		Matcher m = stringManip.matcher(cmd);
-		return m.find();
-	}
+    private boolean stringManip(String cmd) {
+        Matcher m = stringManip.matcher(cmd);
+        return m.find();
+    }
+
+    /*
+     * Checks that any variables used are defined.
+     */
+    private boolean varCheck(String cmd) {
+        String type = varTypes.get(cmd);
+        if (type==null) {
+            result = "Failed to parse: {" + cmd + "} has no value assigned.\n";
+            translated = "";
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
 }

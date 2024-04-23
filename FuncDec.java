@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,13 +20,15 @@ public class FuncDec {
 	private HashMap<String, String> varTypes = null;
 	private HashMap<String, FuncInfo> funcs = null;
 
-	private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
-	private Pattern func_dec = Pattern.compile("^func (.+)\\s*\\((.*)\\)\\s*\\{$");
-	private Pattern return_ln = Pattern.compile("^return( .+)*$");
+    // Patterns
+    private Pattern func_name = Pattern.compile("^([a-zA-Z])+\\w*$");
+    private Pattern func_dec = Pattern.compile("^\\s*func (.+)\\s*\\((.*)\\)\\s*\\{\\s*$");
+	private Pattern return_ln = Pattern.compile("^\\s*return( .+)*\\s*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern bool = Pattern.compile("^true$|^false$");
-	private Pattern string = Pattern.compile("^\"[^\"]*\"$");
-	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+    private Pattern string = Pattern.compile("^\"[^\"]*\"$");
+    private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
+    private ArrayList<String> illegalNames = new ArrayList<String>(List.of("loop","if","input","inputInt","display","displayLine","not", "main"));
 
 	public FuncDec(HashMap<String, String> varTypes, HashMap<String, FuncInfo> funcs) {
 		this.varTypes = varTypes;
@@ -37,7 +40,7 @@ public class FuncDec {
 	 */
 	public boolean parseCmd(String cmd) {
 		match = false;
-		result = "";
+		result = "";  // must be empty for Translator check (cmd not func dec)
 		translated = "";
 		fn = null;
 		name = null;
@@ -53,7 +56,6 @@ public class FuncDec {
 			return true;
 		}
 		else {
-			result = "Failed to parse: { " + cmd + " } is missing a parenthesis or curly bracket";
 			return false;
 		}
 	}
@@ -68,7 +70,11 @@ public class FuncDec {
 		retTranslated = "";
 		if (m.find()) {
 			retResult += "<return>: " + cmd + "\n";
-			retVal = m.group(1).trim();
+			retVal = m.group(1);
+			if (retVal==null) {
+				retVal = "";
+			}
+			retVal = retVal.trim();
 			String retType = getType(retVal);
 			match = (retType != null);
 			if (fn.type != null) {
@@ -85,32 +91,6 @@ public class FuncDec {
 	}
 
 	/*
-	 * Translates the header of a function into java syntax. Assumes parseCmd() was
-	 * successful and function has been fully parsed.
-	 */
-	public String translateHeader() {
-		String paramStr = "";
-		for (String param : fn.params) {
-			if (!paramStr.equals("")) {
-				paramStr += ", ";
-			}
-			paramStr += fn.paramTypes.get(param) + " " + param;
-		}
-
-		return fn.type + " " + name + "(" + String.join(", ", fn.params) + ") {\n";
-	}
-
-	/*
-	 * Translates a return line into java syntax. Assumes parseReturn was
-	 * successful.
-	 * 
-	 * Doesn't translate in parseReturn() so can be used in inner blocks
-	 */
-	public String translateReturn() {
-		return retTranslated;
-	}
-
-	/*
 	 * Performs any tasks needed for when the end of the function is detected.
 	 * 
 	 * Returns false if the function isn't complete.
@@ -121,19 +101,20 @@ public class FuncDec {
 
 		// if never returns, makes a void function
 		if (fn.type == null) {
-			fn.type = "void";
+			result = "Functions must end with a return statement.\n";
+			return false;
 		}
-		headerStr += fn.type + " " + name + " (";
+		headerStr += "static " + fn.type + " " + name + " (";
 		String paramStr = "";
 
 		for (String param : fn.params) {
 			// checks all params were assigned values
 			if (fn.paramTypes.get(param).equals("undef")) {
-				if (varTypes.containsKey(param)) {
-					fn.paramTypes.put(param, varTypes.get(param));
-				} else {
+				if (varTypes.get(param).equals("undef")) {
 					result = "Failed to parse { " + param + " } Paremeter never initialized.\n";
 					match = false;
+				} else {
+					fn.paramTypes.put(param, varTypes.get(param));
 				}
 			}
 
@@ -142,13 +123,12 @@ public class FuncDec {
 				paramStr += ", ";
 			}
 			paramStr += fn.paramTypes.get(param) + " " + param;
+		}
 
-			// removes params from vars and restores old vals if needed
-			if (fn.oldVars.containsKey(param)) {
-				varTypes.replace(param, fn.oldVars.get(param));
-			} else {
-				varTypes.remove(param);
-			}
+		// removes all variables set within function (all b/c funcs at top of file)
+		ArrayList<String> vars = new ArrayList<>(varTypes.keySet()); 
+		for (String var:vars) {
+			varTypes.remove(var);
 		}
 
 		headerStr += paramStr + ") {\n";
@@ -160,23 +140,29 @@ public class FuncDec {
 		funcs.put(name, fn);
 	}
 
-	/*
-	 * Parses a function name by checking if it is a valid name.
-	 */
-	private boolean parseName(String cmd) {
-		Matcher m = func_name.matcher(cmd);
-		if (m.find()) {
-			if (!funcs.containsKey(cmd)) {
-				result += "<func>: " + cmd + "\n";
-				return true;
-			} else {
-				result = "Failed to parse: { " + cmd + " } Function already exists.\n";
-			}
-		} else {
-			result = "Failed to parse: { " + cmd + " } Invalid function name.\n";
-		}
-		return false;
-	}
+
+    /*
+     * Parses a function name by checking if it is a valid name.
+     */
+    private boolean parseName(String cmd) {
+        Matcher m = func_name.matcher(cmd);
+        if(m.find()) {
+            if(illegalNames.contains(cmd)) {
+                result = "Failed to parse: '" + cmd + "'. Is illegal function name.\n";
+            }
+            else if(!funcs.containsKey(cmd)) { 
+                result += "<func>: " + cmd + "\n";
+                return true;
+            }
+            else {
+                result = "Failed to parse: '" + cmd + "'. Function already exists.\n";
+            }
+        }
+        else {
+            result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+        }
+        return false;
+    }
 
 	/*
 	 * Parses the parameters of a function declaration.
@@ -184,7 +170,6 @@ public class FuncDec {
 	private boolean parseParams(FuncInfo fn, String paramsStr) {
 		fn.params = new ArrayList<String>();
 		fn.paramTypes = new HashMap<>();
-		fn.oldVars = new HashMap<>();
 		if (paramsStr.equals("")) {
 			result += "<params>:\n";
 			return true;
@@ -198,9 +183,6 @@ public class FuncDec {
 				if (fn.params.contains(param)) {
 					result = "Failed to parse { " + param + " } Same parameter name used twice.\n";
 					return false;
-				}
-				if (varTypes.containsKey(param)) {
-					fn.oldVars.put(param, varTypes.get(param));
 				}
 				fn.params.add(param);
 				fn.paramTypes.put(param, "undef");
@@ -216,13 +198,13 @@ public class FuncDec {
 		return true;
 	}
 
-	/*
-	 * Gets the type of a (return) value.
-	 */
-	private String getType(String cmd) {
-		FuncCall fnCall = new FuncCall(varTypes, funcs);
-		MultDiv md = new MultDiv();
-		Condition cond = new Condition();
+    /*
+     * Gets the type of a (return) value.
+     */
+    private String getType(String cmd) {
+        FuncCall fnCall = new FuncCall(varTypes,funcs);
+		MultDiv md = new MultDiv(varTypes);
+		Condition cond = new Condition(varTypes);
 
 		// checks for no (void) return value
 		if (cmd.equals("")) {
@@ -263,7 +245,7 @@ public class FuncDec {
 			retResult += "<var>: " + cmd + "\n";
 			return varTypes.get(cmd);
 		} else {
-			retResult = "Failed to parse { " + cmd + " } Invalid value to return.";
+			retResult = "Failed to parse '" + cmd + "'. Invalid value return value.\n";
 		}
 
 		return null;

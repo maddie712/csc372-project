@@ -1,23 +1,19 @@
 import java.util.HashMap;
 
 public class Line {
-	private VarAssign varAssign = null;
-	private FuncCall funcCall = null;
-	private Print print = new Print();
+    private VarAssign varAssign = null;
+    private FuncCall funcCall = null;
+    private Print print = null;
 
-	public boolean match;
-	public String result = "";
-	public String translated = "";
+    public boolean match;
+    public String result = "";
+    public String translated = "";
 
-	public Line() {
-		varAssign = new VarAssign(null, null);
-		funcCall = new FuncCall(null, null);
-	}
-
-	public Line(HashMap<String, String> varTypes, HashMap<String, FuncInfo> funcs) {
-		varAssign = new VarAssign(varTypes, funcs);
-		funcCall = new FuncCall(varTypes, funcs);
-	}
+    public Line(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        varAssign = new VarAssign(varTypes, funcs);
+        funcCall = new FuncCall(varTypes, funcs);
+        print = new Print(varTypes);
+    }
 
 	public boolean parseCmd(String cmd) {
 		result = "";
@@ -37,7 +33,7 @@ public class Line {
 			return true;
 		} else if (varAssign.parseCmd(cmd)) {
 			result = varAssign.result;
-			translated = varAssign.translate();
+			translated = varAssign.translated;
 			return true;
 		} else {
 			result += print.result;
