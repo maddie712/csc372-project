@@ -183,7 +183,7 @@ public class Translator {
 
 		// while in func (stack not empty)
 		while(reader.hasNext() && inFunc) {
-			line = reader.nextLine().trim();  // strip() so will remove all tabs/whitespace/indent at front of str
+			line = reader.nextLine().trim();
 
 			if(line.isBlank()) { 
 				func.translated += "\n"; 
@@ -196,9 +196,8 @@ public class Translator {
 					func.translated += func.translateReturn();
 				}
 				else {
-					// need to find a way to get func name for error msg
-					func.result=("Failed to parse '" + func.name + "'. Must have '}' on line after final function return.");
-					return false;
+					System.out.println("Failed to parse '" + func.name + "'. Must have '}' on line after final function return.");
+					System.exit(0);
 				}
 			}
 			// parses & translates any loops in the func
@@ -222,6 +221,7 @@ public class Translator {
 					func.translated += lineParser.translated;
 				}
 				else {
+					System.out.println(lineParser.result);
 					System.exit(0);
 				}
 			}
@@ -229,8 +229,8 @@ public class Translator {
 
 		// handles if file ends before func closed
 		if(inFunc) {
-			System.out.println("Failed to parse '" + func.name + "'. Function must be closed with '}'.");
-			return false;
+			System.out.println("Failed to parse '" + fn.name + "'. Function must be closed with '}'.");
+			System.exit(0);
 		}
 
 		// makes sure func was complete before saving
@@ -277,6 +277,7 @@ public class Translator {
 					translated += lineParser.translated;
 				}
 				else {
+						System.out.println(lineParser.result);
 					System.exit(0);
 				}
 			}
@@ -323,6 +324,7 @@ public class Translator {
 				translated += lineParser.translated;
 			}
 			else {
+						System.out.println(lineParser.result);
 				System.exit(0);
 			}
 		}

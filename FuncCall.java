@@ -61,10 +61,10 @@ public class FuncCall {
 				translated += cmd;
 				return true;
 			} else {
-				result = "Failed to parse: '" + cmd + "'. Function does not exist.\n";
+				result = "Failed to parse: { " + cmd + " } Function does not exist.\n";
 			}
 		} else {
-			result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+			result = "Failed to parse: { " + cmd + " } Invalid function name.\n";
 		}
 		return false;
 	}
@@ -95,6 +95,10 @@ public class FuncCall {
 			args = String.join(", ", argsArr);
 			result += "<args>: " + args + "\n";
 			translated += "(" + args + ")";
+		}
+		else {
+			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments";
+			return false;
 		}
 
 		return match;
