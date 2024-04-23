@@ -157,7 +157,7 @@ public class Translator {
 			}
 			// returns when stops receiving funcs (no more at top of file)
 			else if (func.result.isEmpty()) {
-				System.out.println("Failed to parse '" + line + "'. Invalid func_dec expression.");
+				//System.out.println("Failed to parse '" + line + "'. Invalid func_dec expression.");
 				return line;
 			}
 			// exits if there is an error in the current func
@@ -229,7 +229,7 @@ public class Translator {
 
 		// handles if file ends before func closed
 		if(inFunc) {
-			System.out.println("Failed to parse '" + fn.name + "'. Function must be closed with '}'.");
+			System.out.println("Failed to parse '" + func.name + "'. Function must be closed with '}'.");
 			System.exit(0);
 		}
 

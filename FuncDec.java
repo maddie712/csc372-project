@@ -40,7 +40,7 @@ public class FuncDec {
 	 */
 	public boolean parseCmd(String cmd) {
 		match = false;
-		result = "";
+		result = "";  // must be empty for Translator check (cmd not func dec)
 		translated = "";
 		fn = null;
 		name = null;
@@ -56,7 +56,6 @@ public class FuncDec {
 			return true;
 		}
 		else {
-			result = "Failed to parse: { " + cmd + " } is missing a parenthesis or curly bracket";
 			return false;
 		}
 	}
