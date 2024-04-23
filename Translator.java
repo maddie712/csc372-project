@@ -2,16 +2,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.Stack;
 
 public class Translator {
-	//ArrayList<String> intVars = new ArrayList<>();
-	//ArrayList<String> stringVars = new ArrayList<>();
-	//ArrayList<String> boolVars = new ArrayList<>();
-
 	private static HashMap<String,String> varTypes = null;
 	private static HashMap<String,FuncInfo> funcs = null;
 	private static FuncDec func = null;

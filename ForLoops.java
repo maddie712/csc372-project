@@ -7,21 +7,23 @@ public class ForLoops {
     private Pattern loopPattern = Pattern.compile(loopRegex, Pattern.DOTALL);
     private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
-    private MultDiv multDiv1 = new MultDiv();
-    private MultDiv multDiv2 = new MultDiv();
-    private Condition condition = new Condition();
+    private MultDiv multDiv1 = null;
+    private MultDiv multDiv2 = null;
+    private Condition condition = null;
     private Line line = null;
+    private HashMap<String,String> varTypes = null;
     
     public boolean match;
     public String result = "";
     public String translated = "";
 
-    public ForLoops() {
-        line = new Line();
-    }
 
     public ForLoops(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        this.varTypes = varTypes;
         line = new Line(varTypes, funcs);
+        multDiv1 = new MultDiv(varTypes);
+        multDiv2 = new MultDiv(varTypes);
+        condition = new Condition(varTypes);
     }
 
 

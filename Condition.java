@@ -1,10 +1,17 @@
+import java.util.HashMap;
+
 public class Condition {
 
-    private CompExpr comp = new CompExpr();
-    private AndOr andOr = new AndOr();
+    private CompExpr comp = null;
+    private AndOr andOr = null;
     public boolean match;
     public String result = "";
     public String translated = "";
+
+    public Condition(HashMap<String,String> varTypes) {
+        comp = new CompExpr(varTypes);
+        andOr = new AndOr(varTypes);
+    }
 
     public boolean parseCmd(String cmd) {
         match = condition(cmd);

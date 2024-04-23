@@ -225,8 +225,8 @@ public class FuncDec {
      */
     private String getType(String cmd) {
         FuncCall fnCall = new FuncCall(varTypes,funcs);
-		MultDiv md = new MultDiv();
-		Condition cond = new Condition();
+		MultDiv md = new MultDiv(varTypes);
+		Condition cond = new Condition(varTypes);
 
         // checks for no (void) return value
         if(cmd.equals("")) {

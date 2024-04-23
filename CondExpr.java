@@ -6,7 +6,7 @@ public class CondExpr {
     private Pattern ifElsePattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*else\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
     private Pattern ifPattern = Pattern.compile("^\\s*if\\s*\\((.+)\\)\\s*\\{(.*)\\}\\s*$", Pattern.DOTALL);
 
-    private Condition cond = new Condition();
+    private Condition cond = null;
     private Line line1 = null;
     private Line line2 = null;
 
@@ -14,12 +14,9 @@ public class CondExpr {
     public String result = "";
     public String translated = "";
 
-    public CondExpr() {
-        line1 = new Line();
-        line2 = new Line();
-    }
 
     public CondExpr(HashMap<String,String> varTypes, HashMap<String,FuncInfo> funcs) {
+        cond = new Condition(varTypes);
         line1 = new Line(varTypes, funcs);
         line2 = new Line(varTypes, funcs);
     }

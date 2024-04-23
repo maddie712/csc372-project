@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -6,10 +7,15 @@ public class MultDiv {
 	private Pattern intVal = Pattern.compile("^\\d+$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     private Pattern op = Pattern.compile("^[+\\-*/%]$");
+    private HashMap<String,String> varTypes = null;
 
     public boolean match;
     public String result = "";
     public String translated = "";
+
+    public MultDiv(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+    }
 
     public boolean parseCmd(String cmd) {
         match = arithmeticExpr(cmd);
@@ -49,6 +55,8 @@ public class MultDiv {
                     translated += token;
                 }
                 else if (variable(token)) {
+                    if (!typeCheck(token)) 
+                        return false;
                     result += "<var>: " + token.trim() + "\n";
                     translated += token;
                 }
@@ -96,5 +104,20 @@ public class MultDiv {
         Matcher m = op.matcher(cmd);
         boolean match = m.find();
         return match;
+    }
+
+    /*
+     * Checks that any variables used are initialised to integer values.
+     */
+    private boolean typeCheck(String cmd) {
+        String type = varTypes.get(cmd);
+        if (type!=null && type.equals("int")) {
+            return true;
+        }
+        else {
+            result = "Failed to parse: {" + cmd + "} is not assigned an integer.\n";
+            translated = "";
+            return false;
+        }
     }
 }

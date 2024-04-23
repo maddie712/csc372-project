@@ -112,8 +112,8 @@ public class VarAssign {
 	 */
     private boolean parseVal(String cmd) {
 		FuncCall fnCall = new FuncCall(varTypes,funcs);
-		MultDiv md = new MultDiv();
-		Condition cond = new Condition();
+		MultDiv md = new MultDiv(varTypes);
+		Condition cond = new Condition(varTypes);
 		Input in = new Input();
 		result += "<val>: " + cmd + "\n";  // val isn't a nt but I think makes parsing is clearer
 

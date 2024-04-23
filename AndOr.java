@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8,7 +9,8 @@ public class AndOr {
 	public String result = "";
 	public String translated = "";
 	
-	private CompExpr comp = new CompExpr();
+	private CompExpr comp;
+    private HashMap<String,String> varTypes = null;
 	
     Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
     Pattern andOr = Pattern.compile("^([\\s\\S]+)\\s*(and|or)\\s*([\\s\\S]+)$");
@@ -17,6 +19,10 @@ public class AndOr {
     Pattern bool = Pattern.compile("^true$|^false$");
     Pattern andOrLiteral = Pattern.compile("^and$|^or$");
 
+    public AndOr(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+        comp = new CompExpr(varTypes);
+    }
 
     // interactive terminal version 
     public void run(String[] args) {
@@ -75,6 +81,8 @@ public class AndOr {
                     printMsg(match, "<bool>", token.trim(), "boolean");
                 }
                 else if (variable(token)) {
+                    if (!typeCheck(token)) 
+                        return false;
                     printMsg(match, "<var>", token.trim(), "variable");
                 }
                 else if (comp.parseCmd(token)) {
@@ -132,7 +140,10 @@ public class AndOr {
                 printMsg(match, "<bool>", token.trim(), "boolean");
             }
             else if (variable(token)){
-                printMsg(match, "<var>", token.trim(), "variable");
+                if (typeCheck(token)) 
+                    printMsg(match, "<var>", token.trim(), "variable");
+                else 
+                    return false;
             }
             else if (token.contains("and") || token.contains("or")) {
                 andOrExpr(token);
@@ -191,6 +202,20 @@ public class AndOr {
 		else
 			result = "Failed to parse: {" + cmd + "} is not a valid " + item + ".\n";
 	}
+
+    /*
+     * Checks that any variables used are initialised to boolean values.
+     */
+    private boolean typeCheck(String cmd) {
+        String type = varTypes.get(cmd);
+        if (type!=null && type.equals("boolean")) {
+            return true;
+        }
+        else {
+            result = "Failed to parse: {" + cmd + "} is not a boolean variable.\n";
+            return false;
+        }
+    }
     
     public String translate(String string) {
     	String result = "";
