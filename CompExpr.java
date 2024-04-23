@@ -126,7 +126,7 @@ public class CompExpr {
             return true;
         }
         else {
-            result = "Failed to parse: {" + cmd + "} is not an integer variable.\n";
+            result = "'" + cmd + "' is not an initialized integer variable.\n";
             return false;
         }
     }

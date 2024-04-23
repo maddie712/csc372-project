@@ -1,5 +1,4 @@
 import java.util.HashMap;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +16,11 @@ public class AndOr {
 	Pattern notLiteral = Pattern.compile("^not$");
 	Pattern bool = Pattern.compile("^true$|^false$");
 	Pattern andOrLiteral = Pattern.compile("^and$|^or$");
+
+    public AndOr(HashMap<String,String> varTypes) {
+        this.varTypes = varTypes;
+		comp = new CompExpr(varTypes);
+    }
 
 	public boolean parseCmd(String cmd) {
         result = "";
@@ -186,7 +190,7 @@ public class AndOr {
             return true;
         }
         else {
-            result = "Failed to parse: {" + cmd + "} is not a boolean variable.\n";
+            result = "'" + cmd + "' is not an initialized boolean variable.\n";
             return false;
         }
     }

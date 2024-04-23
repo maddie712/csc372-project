@@ -115,7 +115,7 @@ public class MultDiv {
             return true;
         }
         else {
-            result = "Failed to parse: {" + cmd + "} is not assigned an integer.\n";
+            result = "'" + cmd + "' is not an initialized integer variable.\n";
             translated = "";
             return false;
         }

@@ -21,9 +21,6 @@ public class ForLoops {
 	public String result = "";
 	public String translated = "";
 
-	public ForLoops() {
-		line = new Line();
-	}
 
 	public ForLoops(HashMap<String, String> varTypes, HashMap<String, FuncInfo> funcs) {
 		this.varTypes = varTypes;

@@ -253,7 +253,7 @@ public class FuncDec {
 			retResult += "<var>: " + cmd + "\n";
 			return varTypes.get(cmd);
 		} else {
-			retResult = "Failed to parse '" + cmd + "'. Invalid value to return.";
+			retResult = "Failed to parse '" + cmd + "'. Invalid value return value.";
 		}
 
 		return null;

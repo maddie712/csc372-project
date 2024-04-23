@@ -93,7 +93,7 @@ public class Print {
 				result += "<int>: " + token.trim() + "\n";
 				translated += token + ");";
 			} else if (variable(token)) {
-                if(!varCheck(cmd)) 
+                if(!varCheck(token)) 
                     return false;
 				result += "<var>: " + token.trim() + "\n";
 				translated += token + ");";

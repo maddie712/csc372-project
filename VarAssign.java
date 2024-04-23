@@ -84,11 +84,11 @@ public class VarAssign {
 			}
 			// if var already exists but with different type assignment
 			else {
-				result = "Failed to parse: { " + cmd + " } Mismatch type assign.\n";
+				result = "'" + cmd + "' is already initialized with a different type.\n";
 				match = false;
 			}
 		} else {
-			result = "Failed to parse: { " + cmd + " } Invalid variable name.\n";
+			result = "'" + cmd + "' is not a valid variable name.\n";
 		}
 
 		return match;
@@ -148,7 +148,7 @@ public class VarAssign {
 		// checks for variable assignment and checks var is initialised
 		else if (var.matcher(cmd).find() && varTypes.get(cmd) != null) {
 			if (varTypes.get(cmd).equals("undef")) {
-				result = "Failed to parse: { " + cmd + " } Need to initialise parameter before using.\n";
+				result = "Need to initialise parameter '" + cmd + "' before using.\n";
 				return false;
 			}
 			type = varTypes.get(cmd);
@@ -160,7 +160,7 @@ public class VarAssign {
 			result += md.result;
 			result += cond.result;
 			result += in.result;
-			result += "Failed to parse: { " + cmd + " } Invalid value to assign.\n";
+			result += "'" + cmd + "is not a valid value to assign.\n";
 			return false;
 		}
 

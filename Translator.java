@@ -25,7 +25,6 @@ public class Translator {
 		FileWriter outFile = new FileWriter(newFilename + ".java");
 		outFile.write("import java.util.Scanner;\n");
 		outFile.write("public class " + newFilename + " {\n");
-		int check = 0;
 		Scanner reader;
 		try {
 			reader = new Scanner(inFile);
@@ -45,19 +44,17 @@ public class Translator {
 				if (readFuncs) {  // parses all funcs from top of file first
 					line = parseFuncs(reader, outFile);
 					readFuncs = false;
-					///// TEMPORARY
 					outFile.write("public static void main(String[] args) {\n");
 				}
 				else {
 					line = reader.nextLine().trim();
 				}
 
-				if (line.isBlank()) { continue; }
+				if (line.isBlank()) { 
+					outFile.write("\n"); 
+					continue;
+				}
 				if (line.contains("loop(")) {
-					check++;
-					if (check == 1) {
-						outFile.write("public static void main(String[] args) {\n");
-					}
 					String loopBlock = buildBlock(line, reader);
 					if (loop.parseCmd(loopBlock)) {
 						System.out.println(loop.result);
@@ -70,10 +67,6 @@ public class Translator {
 					}
 				}
 				else if (line.contains("if ")) {
-					check++;
-					if (check == 1) {
-						outFile.write("public static void main(String[] args) {\n");
-					}
 					String ifElseBlock = buildBlock(line, reader);
 					if (condExpr.parseCmd(ifElseBlock)) {
 						System.out.println(condExpr.result);
@@ -86,15 +79,10 @@ public class Translator {
 					}
 				}
 				else if (func.parseCmd(line)) {
-					System.out.println("Failed to parse '" + line + "'. Functions must be initialised before rest of code.");
+					System.out.println("Failed to parse '" + line + "'. Functions must be initialized before rest of code.");
 					System.exit(0);
 				}
 				else {
-					check++;
-					if (check == 1) {
-						outFile.write("public static void main(String[] args) {\n");
-					}
-					Line lineParser = new Line(varTypes,funcs);
 					boolean match = lineParser.parseCmd(line);
 					if (match) {
 						System.out.println(lineParser.result);
@@ -107,10 +95,7 @@ public class Translator {
 					}
 				}
 			}
-			if (check >= 1) {
-				outFile.write("}\n");
-			}
-			outFile.write("}\n");
+			outFile.write("}\n}\n");
 			reader.close();
 			outFile.close();
 		} catch (FileNotFoundException e) {
@@ -156,9 +141,10 @@ public class Translator {
 	public static String parseFuncs(Scanner reader, FileWriter outFile) throws IOException {
 		while (reader.hasNextLine()) {
 			String line = reader.nextLine().trim();
-			if(line.isBlank()) { continue; }
-
-			if(func.parseCmd(line)) {
+			if(line.isBlank()) { 
+				outFile.write("\n"); 
+			}
+			else if(func.parseCmd(line)) {
 				// reads through the func that starts on the current line
 				if (funcHelper(line, reader)) {
 					System.out.println(func.translated);
@@ -199,10 +185,11 @@ public class Translator {
 		while(reader.hasNext() && inFunc) {
 			line = reader.nextLine().trim();  // strip() so will remove all tabs/whitespace/indent at front of str
 
-			if(line.isBlank()) { continue; }
-
+			if(line.isBlank()) { 
+				func.translated += "\n"; 
+			}
 			// handles final func return
-			if(func.parseReturn(line)) {
+			else if(func.parseReturn(line)) {
 				if(reader.nextLine().strip().equals("}")) {
 					inFunc = false;
 					func.result += func.retResult;
@@ -260,7 +247,6 @@ public class Translator {
 	 * Handles parsing through a loop in a function body.
 	 */
 	public static String[] loopHelper(String line, Scanner reader) {
-		//boolean inFunc = func!=null;
 		String result = "";
 		String translated = "";
 		boolean inLoop = true;
@@ -308,7 +294,6 @@ public class Translator {
 	 * Handles parsing through a cond expr in a function body.
 	 */
 	public static String[] condExprHelper(String line, Scanner reader) {
-		//boolean inFunc = func!=null;
 		String result = "";
 		String translated = "";
 		boolean inExpr = true;

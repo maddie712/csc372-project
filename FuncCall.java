@@ -87,7 +87,7 @@ public class FuncCall {
 				String param = func.params.get(i);
 				String argType = getType(argsArr[i]);
 				if (!(func.paramTypes.get(param).equals(argType))) {
-					result = "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
+					result = "Failed to parse: '" + argsArr[i] + "'. Not a " + argType + " value.\n";
 					return false;
 				}
 			}
@@ -117,7 +117,6 @@ public class FuncCall {
 			return varTypes.get(arg);
 		}
 
-		result = "Failed to parse: '" + arg + "'. Invalid arg value.\n";
-		return "";
+		return ""; 
 	}
 }
