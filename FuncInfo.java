@@ -12,6 +12,4 @@ public class FuncInfo {
 	public String type = null;
 	public ArrayList<String> params = null;
 	public HashMap<String, String> paramTypes = null;
-	public HashMap<String, String> oldVars = null;
-
 }

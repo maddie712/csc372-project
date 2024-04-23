@@ -122,10 +122,18 @@ public class CompExpr {
      */
     private boolean typeCheck(String cmd) {
         String type = varTypes.get(cmd);
-        if (type!=null && type.equals("int")) {
-            return true;
+        if (type==null) {
+            result = "'" + cmd + "' is not an initialized integer variable.\n";
+            return false;
         }
-        else {
+        else if (type.equals("int")) {
+			return true;
+		}
+		else if (type.equals("undef")) {
+			varTypes.put(cmd,"int");
+			return true;
+		}
+		else {
             result = "'" + cmd + "' is not an initialized integer variable.\n";
             return false;
         }

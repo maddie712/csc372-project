@@ -42,7 +42,7 @@ public class FuncCall {
 			match = match && parseArgs(m.group(2).trim());
 		}
         else {
-            result = "Failed to parse '" + cmd + "'. Invalid func_call expression.";
+            result = "Failed to parse '" + cmd + "'. Invalid func_call expression.\n";
         }
 
 		return match;
@@ -97,7 +97,7 @@ public class FuncCall {
 			translated += "(" + args + ")";
 		}
 		else {
-			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments";
+			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments\n";
 			return false;
 		}
 

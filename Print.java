@@ -147,7 +147,7 @@ public class Print {
      */
     private boolean varCheck(String cmd) {
         String type = varTypes.get(cmd);
-        if (type==null || type.equals("undef")) {
+        if (type==null) {
             result = "Failed to parse: {" + cmd + "} has no value assigned.\n";
             translated = "";
             return false;

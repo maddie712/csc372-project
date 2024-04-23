@@ -193,7 +193,7 @@ public class Translator {
 				if(reader.nextLine().strip().equals("}")) {
 					inFunc = false;
 					func.result += func.retResult;
-					func.translated += func.translateReturn();
+					func.translated += func.retTranslated;
 				}
 				else {
 					System.out.println("Failed to parse '" + func.name + "'. Must have '}' on line after final function return.");
@@ -201,16 +201,30 @@ public class Translator {
 				}
 			}
 			// parses & translates any loops in the func
-			else if (loop.parseCmd(line)) {
-				String[] helpRet = loopHelper(line,reader);
-				func.result += helpRet[0];
-				func.translated += helpRet[1];
+			else if (line.contains("loop(")) {
+				String loopBlock = buildBlock(line, reader);
+				if (loop.parseCmd(loopBlock)) {
+					System.out.println(loop.result);
+					func.result += loop.result;
+					func.translated += loop.translated;
+				}
+				else {
+					System.out.println(loop.result);
+					System.exit(0);
+				}
 			}
-			// parses & translates any if stmts in the func
-			else if (condExpr.parseCmd(line)) {
-				String[] helpRet = condExprHelper(line,reader);
-				func.result += helpRet[0];
-				func.translated += helpRet[1];
+			// parses & translates any if-stmts in the func
+			else if (line.contains("if ")) {
+				String ifElseBlock = buildBlock(line, reader);
+				if (condExpr.parseCmd(ifElseBlock)) {
+					System.out.println(condExpr.result);
+					func.result += condExpr.result;
+					func.translated += (condExpr.translated);
+				}
+				else {
+					System.out.println(condExpr.result);
+					System.exit(0);
+				}
 			}
 			// parses & translates any line's in the func
 			else {
@@ -242,101 +256,4 @@ public class Translator {
 			return false;
 		}		
 	}
-
-	/*
-	 * Handles parsing through a loop in a function body.
-	 */
-	public static String[] loopHelper(String line, Scanner reader) {
-		String result = "";
-		String translated = "";
-		boolean inLoop = true;
-		String firstLine = line;
-
-		result += loop.result;
-		translated += loop.translated;
-		while(reader.hasNextLine() && inLoop) {
-			line = reader.nextLine().trim();
-
-			if(func.parseReturn(line)) {
-				result += func.retResult;
-				translated += func.translateReturn();
-			}
-			else if (loop.parseCmd(line)) {
-				String[] helpRet = loopHelper(line, reader);
-				result += helpRet[0];
-				translated += helpRet[1];
-			}
-			else if (condExpr.parseCmd(line)) {
-				String[] helpRet = condExprHelper(line, reader);
-				result += helpRet[0];
-				translated += helpRet[1];
-			}
-			else {
-				if (lineParser.parseCmd(line)) {
-					result += lineParser.result;
-					translated += lineParser.translated;
-				}
-				else {
-						System.out.println(lineParser.result);
-					System.exit(0);
-				}
-			}
-		}
-
-		if(inLoop) {
-			System.out.println("Failed to parse '" + firstLine + "'. Loop must be closed with '}'.");
-		}
-		
-		String[] ret = {result, translated+"\n"};
-		return ret;
-	} 
-
-	/*
-	 * Handles parsing through a cond expr in a function body.
-	 */
-	public static String[] condExprHelper(String line, Scanner reader) {
-		String result = "";
-		String translated = "";
-		boolean inExpr = true;
-		String firstLine = line;
-
-		result += condExpr.result;
-		translated += condExpr.translated;
-		while(reader.hasNextLine() && inExpr) {
-			line = reader.nextLine().trim();
-
-			if(func.parseReturn(line)) {
-				result += func.retResult;
-				translated += func.translateReturn();
-			}
-			else if (loop.parseCmd(line)) {
-				String[] helpRet = loopHelper(line,reader);
-				result += helpRet[0];
-				translated += helpRet[1];
-			}
-			else if (condExpr.parseCmd(line)) {
-				String[] helpRet = condExprHelper(line,reader);
-				result += helpRet[0];
-				translated += helpRet[1];
-			}
-			else if (lineParser.parseCmd(line)) {
-				result += lineParser.result;
-				translated += lineParser.translated;
-			}
-			else {
-						System.out.println(lineParser.result);
-				System.exit(0);
-			}
-		}
-
-			if(inExpr) {
-				System.out.println("Failed to parse loop '" + firstLine + "'. Loop must be closed with '}'.");
-			}
-
-		String[] ret = {result, translated+"\n"};
-		
-		return ret;
-	}
-
-
 }

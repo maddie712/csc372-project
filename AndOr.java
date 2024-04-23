@@ -186,9 +186,17 @@ public class AndOr {
      */
     private boolean typeCheck(String cmd) {
         String type = varTypes.get(cmd);
-        if (type!=null && type.equals("boolean")) {
-            return true;
+        if (type==null) {
+            result = "'" + cmd + "' is not an initialized boolean variable.\n";
+            return false;
         }
+        else if (type.equals("boolean")) {
+			return true;
+		}
+		else if (type.equals("undef")) {
+			varTypes.put(cmd,"boolean");
+			return true;
+		}
         else {
             result = "'" + cmd + "' is not an initialized boolean variable.\n";
             return false;
