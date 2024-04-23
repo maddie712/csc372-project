@@ -29,6 +29,9 @@ public class FuncCall {
         this.funcs = funcs;
     }
 
+
+    // Public Methods
+
     /*
      * Parses a function call in our language.
      */
@@ -51,15 +54,8 @@ public class FuncCall {
 
         return match;
     }
-
-    /*
-     * Translates the function call into java syntax. 
-     * Does not add newline or ; to end because can be inline
-     */
-    public String translate() {
-        return func.name + "(" + args + ")";
-    }
         
+
     // Private Methods
 
     /*
