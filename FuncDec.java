@@ -50,9 +50,12 @@ public class FuncDec {
 			match = true;
 			match = match && parseName(fn.name);
 			match = match && parseParams(fn, m.group(2).trim());
+			return true;
 		}
-
-		return match;
+		else {
+			result = "Failed to parse: { " + cmd + " } is missing a parenthesis or curly bracket";
+			return false;
+		}
 	}
 
 	/*
@@ -129,7 +132,7 @@ public class FuncDec {
 				if (varTypes.containsKey(param)) {
 					fn.paramTypes.put(param, varTypes.get(param));
 				} else {
-					result = "Failed to parse '" + param + "'. Paremeter never initialized.\n";
+					result = "Failed to parse { " + param + " } Paremeter never initialized.\n";
 					match = false;
 				}
 			}
@@ -167,10 +170,10 @@ public class FuncDec {
 				result += "<func>: " + cmd + "\n";
 				return true;
 			} else {
-				result = "Failed to parse: '" + cmd + "'. Function already exists.\n";
+				result = "Failed to parse: { " + cmd + " } Function already exists.\n";
 			}
 		} else {
-			result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+			result = "Failed to parse: { " + cmd + " } Invalid function name.\n";
 		}
 		return false;
 	}
@@ -193,7 +196,8 @@ public class FuncDec {
 			Matcher m = var.matcher(param);
 			if (m.find()) {
 				if (fn.params.contains(param)) {
-					result = "Failed to parse '" + param + "'. Same parameter name used twice.\n";
+					result = "Failed to parse { " + param + " } Same parameter name used twice.\n";
+					return false;
 				}
 				if (varTypes.containsKey(param)) {
 					fn.oldVars.put(param, varTypes.get(param));
@@ -202,7 +206,7 @@ public class FuncDec {
 				fn.paramTypes.put(param, "undef");
 				varTypes.put(param, "undef");
 			} else {
-				result = "Failed to parse: '" + param + "'. Invalid variable name.\n";
+				result = "Failed to parse: { " + param + " } Invalid variable name.\n";
 				return false;
 			}
 		}
@@ -259,7 +263,7 @@ public class FuncDec {
 			retResult += "<var>: " + cmd + "\n";
 			return varTypes.get(cmd);
 		} else {
-			retResult = "Failed to parse '" + cmd + "'. Invalid value to return.";
+			retResult = "Failed to parse { " + cmd + " } Invalid value to return.";
 		}
 
 		return null;

@@ -64,10 +64,10 @@ public class FuncCall {
 				translated += cmd;
 				return true;
 			} else {
-				result = "Failed to parse: '" + cmd + "'. Function does not exist.\n";
+				result = "Failed to parse: { " + cmd + " } Function does not exist.\n";
 			}
 		} else {
-			result = "Failed to parse: '" + cmd + "'. Invalid function name.\n";
+			result = "Failed to parse: { " + cmd + " } Invalid function name.\n";
 		}
 		return false;
 	}
@@ -90,7 +90,7 @@ public class FuncCall {
 				String param = func.params.get(i);
 				String argType = getType(argsArr[i]);
 				if (!(func.paramTypes.get(param).equals(argType))) {
-					result = "Failed to parse: '" + argsArr[i] + "'. Invalid arg value.\n";
+					result = "Failed to parse: { " + argsArr[i] + " } Invalid arg value.\n";
 					return false;
 				}
 			}
@@ -98,6 +98,10 @@ public class FuncCall {
 			args = String.join(", ", argsArr);
 			result += "<args>: " + args + "\n";
 			translated += "(" + args + ")";
+		}
+		else {
+			result = "Failed to parse: { " + cmd + " } contains too little or too many arguments";
+			return false;
 		}
 
 		return match;
@@ -119,8 +123,7 @@ public class FuncCall {
 		} else if (var.matcher(arg).find() && varTypes.containsKey(arg)) {
 			return varTypes.get(arg);
 		}
-
-		result = "Failed to parse: '" + arg + "'. Invalid arg value.\n";
+		result = "Failed to parse: { " + arg + " } Invalid arg value.\n";
 		return "";
 	}
 }

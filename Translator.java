@@ -64,13 +64,11 @@ public class Translator {
 				}
 				else if (line.startsWith("func ")) {
 					FuncDec fn = new FuncDec(varTypes, funcs);
-
 					if (funcHelper(line, reader, fn)) {
-						System.out.println(fn.result);
 						outFile.write(fn.translated);
 					}
 					else {
-						System.out.println(fn.result);
+						System.out.println("Failed to parse function line");
 						outFile.close();
 						System.exit(0);
 					}
@@ -144,7 +142,7 @@ public class Translator {
 
 		// while in func (stack not empty)
 		while(reader.hasNext() && inFunc) {
-			line = reader.nextLine().trim();  // strip() so will remove all tabs/whitespace/indent at front of str
+			line = reader.nextLine().trim();
 
 			// handles final func return
 			if(fn.parseReturn(line)) {
@@ -154,9 +152,8 @@ public class Translator {
 					fn.translated += fn.translateReturn();
 				}
 				else {
-					// need to find a way to get func name for error msg
-					fn.result=("Failed to parse '" + fn.name + "'. Must have '}' on line after final function return.");
-					return false;
+					System.out.println("Failed to parse '" + fn.name + "'. Must have '}' on line after final function return.");
+					System.exit(0);
 				}
 			}
 			else if (line.startsWith("loop")) {
@@ -172,12 +169,12 @@ public class Translator {
 			else {
 				Line lineParser = new Line(varTypes,funcs);
 				boolean match = lineParser.parseCmd(line);
-				fn.result += lineParser.result;
 				if (match) {
 					fn.result += lineParser.result;
 					fn.translated += lineParser.translated;
 				}
 				else {
+					System.out.println(lineParser.result);
 					System.exit(0);
 				}
 			}
@@ -186,7 +183,7 @@ public class Translator {
 		// handles if file ends before func closed
 		if(inFunc) {
 			System.out.println("Failed to parse '" + fn.name + "'. Function must be closed with '}'.");
-			return false;
+			System.exit(0);
 		}
 
 		if(fn.endFunc()) {
@@ -232,6 +229,7 @@ public class Translator {
 						translated += lineParser.translated;
 					}
 					else {
+						System.out.println(lineParser.result);
 						System.exit(0);
 					}
 				}
@@ -286,6 +284,7 @@ public class Translator {
 						translated += lineParser.translated;
 					}
 					else {
+						System.out.println(lineParser.result);
 						System.exit(0);
 					}
 				}
