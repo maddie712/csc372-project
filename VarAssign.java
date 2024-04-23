@@ -3,19 +3,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VarAssign {
-	// Public Variables
 	public boolean match;
 	public String result;
 	public String translated;
 
-	// Private Variables
 	private String varName = null;
 	private String type = null;
 	private String val = null;
 	private HashMap<String, String> varTypes = null;
 	private HashMap<String, FuncInfo> funcs = null;
 
-	// Patterns
 	private Pattern var_assign = Pattern.compile("^(.+)\\s*=\\s*(.+)$");
 	private Pattern var = Pattern.compile("^[a-zA-Z][a-zA-z_0-9]*$");
 	private Pattern intVal = Pattern.compile("^\\d+$");
@@ -45,7 +42,7 @@ public class VarAssign {
 			match = match && parseVar(cmd.substring(0, cmd.indexOf("=")).trim());
 		}
 		else {
-			result += "Failed to parse '" + cmd + "'. Invalid var_assign expression.\n";
+			result += "Failed to parse: '" + cmd + "'. Invalid var_assign expression.\n";
 		}
 
 		return match;
@@ -84,7 +81,7 @@ public class VarAssign {
 			}
 			// if var already exists but with different type assignment
 			else {
-				result = "'" + cmd + "' is already initialized with a different type.\n";
+				result = "Failed to parse: '" + cmd + "' is already initialized with a different type.\n";
 				match = false;
 			}
 		} else {

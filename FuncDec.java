@@ -101,7 +101,8 @@ public class FuncDec {
 
 		// if never returns, makes a void function
 		if (fn.type == null) {
-			fn.type = "void";
+			result = "Functions must end with a return statement.\n";
+			return false;
 		}
 		headerStr += "static " + fn.type + " " + name + " (";
 		String paramStr = "";
